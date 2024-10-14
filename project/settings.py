@@ -40,8 +40,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'api',
-    'account',
+    'accounts',
     'dashboard',
+    'offer_templates',
+    'offers',
+    'products',
+    'integrations',
+    'orders',
+    "reporting",
 ]
 
 MIDDLEWARE = [
@@ -59,7 +65,7 @@ ROOT_URLCONF = 'project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / "templates"], 
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -91,6 +97,8 @@ DATABASES = {
     }
 }
 
+LOGIN_URL = '/accounts/login/'  # URL for the login view
+LOGIN_REDIRECT_URL = '/admin/'  # Redirect to the admin after login
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
