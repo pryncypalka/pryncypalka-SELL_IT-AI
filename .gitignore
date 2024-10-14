@@ -68,3 +68,7 @@ nosetests.xml
 coverage.xml
 *.cover
 .hypothesis/
+
+# Ignorowanie plików SQLite
+db.sqlite3
+db.sqlite3-journal
