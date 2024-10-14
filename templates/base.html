@@ -1,0 +1,22 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Your CSS and JS imports -->
+    <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
+    <script src="{% static 'js/htmx.min.js' %}"></script>
+
+    <!-- Additional head content if needed in child templates -->
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    {% block content %}{% endblock %}
+
+    <!-- Block to include extra scripts if needed in child templates -->
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>
