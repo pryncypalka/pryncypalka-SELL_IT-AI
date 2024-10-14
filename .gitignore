@@ -1,0 +1,70 @@
+# System
+.DS_Store
+Thumbs.db
+
+# Python
+*.py[cod]
+*$py.class
+__pycache__/
+*.so
+
+# Django
+*.log
+*.pot
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+local_settings.py
+
+# Kompilowane przez Pythona
+*.pyc
+
+# Wirtualne środowisko
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Django Migrations
+*/migrations/*
+
+# Edytory IDE i narzędzia
+.idea/
+*.sublime-project
+*.sublime-workspace
+.vscode/
+.vscode/settings.json
+.vscode/tasks.json
+.vscode/launch.json
+.vscode/extensions.json
+.history
+
+# NodeJS
+node_modules/
+npm-debug.log*
+
+# Dodatkowe pliki IDE
+*.swp
+*.swo
+
+# Celery
+celerybeat-schedule.*
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# Jednostkowe testy i raporty pokrycia kodu
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+.pytest_cache/
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
