@@ -14,7 +14,7 @@ class Subcategory(models.Model):
 
 
     def __str__(self):
-        return self.subcategory_name
+        return f"{self.subcategory_name} ({self.category.category_name})"
 
 
 
