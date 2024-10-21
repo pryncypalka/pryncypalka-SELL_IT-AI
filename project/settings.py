@@ -11,6 +11,10 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -97,14 +101,24 @@ INTERNAL_IPS = [
 #     }
 # }
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',  # Ustawienie silnika na PostgreSQL
+#         'NAME': 'SELLIT_AI_DB',               # Nazwa bazy danych
+#         'USER': 'postgres',                    # Nazwa użytkownika bazy danych
+#         'PASSWORD': 'password',                # Hasło użytkownika bazy danych
+#         'HOST': 'localhost',                        # Adres hosta, np. 'localhost' dla lokalnego serwera
+#         'PORT': '5433',                             # Port PostgreSQL, domyślnie 5432
+#     }
+# }
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',  # Ustawienie silnika na PostgreSQL
-        'NAME': 'SELLIT_AI_DB',               # Nazwa bazy danych
-        'USER': 'postgres',                    # Nazwa użytkownika bazy danych
-        'PASSWORD': 'password',                # Hasło użytkownika bazy danych
-        'HOST': 'localhost',                        # Adres hosta, np. 'localhost' dla lokalnego serwera
-        'PORT': '5433',                             # Port PostgreSQL, domyślnie 5432
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('DATABASE_NAME'),
+        'USER': os.environ.get('DATABASE_USER'),
+        'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
+        'HOST': os.environ.get('DATABASE_HOST'), # For local development, use 'localhost' or '127.0.0.1'
+        'PORT': os.environ.get('DATABASE_PORT'), # Default PostgreSQL port is usually '5432' 
     }
 }
 
