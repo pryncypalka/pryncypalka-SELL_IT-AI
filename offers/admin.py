@@ -3,9 +3,14 @@ from .models import Offer, Photo
 
 class PhotoInline(admin.TabularInline):
     model = Photo
-    extra = 1  # liczba pustych formularzy do dodania zdjęć
+    extra = 1 
+    readonly_fields = ['image_tag']  
+
+    @admin.display(description='Thumbnail')
+    def image_tag(self, obj):
+        return obj.image_tag() 
 
 @admin.register(Offer)
 class OfferAdmin(admin.ModelAdmin):
-    list_display = ('title', 'description')  # pola, które wyświetlają się na liście ofert
-    inlines = [PhotoInline]  # dodanie zdjęć do formularza edycji oferty
+    list_display = ('title', 'description')  
+    inlines = [PhotoInline] 

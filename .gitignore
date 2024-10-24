@@ -72,3 +72,6 @@ coverage.xml
 # Ignorowanie plików SQLite
 db.sqlite3
 db.sqlite3-journal
+
+# photos
+uploads/

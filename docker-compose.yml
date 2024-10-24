@@ -18,6 +18,7 @@ services:
       - '8000:8000'
     volumes:
       - .:/app
+      - media_volume:/app/uploads
     environment:
       - DJANGO_ENV=${DJANGO_ENV}
       - DATABASE_NAME=${DATABASE_NAME}
@@ -30,3 +31,4 @@ services:
 
 volumes:
   pg_data:
+  media_volume:
