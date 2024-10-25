@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from django.conf import settings
-from products.models import Item
+from products.models import Category
 import os
 import uuid
 from django.utils.html import mark_safe
@@ -20,7 +20,7 @@ class Offer(models.Model):
 
     title = models.CharField(max_length=255, null=False)
 
-    item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
 
     description = models.TextField(max_length=3000, null=True)
 
@@ -40,5 +40,8 @@ class Photo(models.Model):
     
     def image_tag(self):
         if self.photo:
-            return mark_safe(f'<img src="{self.photo.url}" width="100" height="100" />')
+            # Wyświetlanie obrazu z zachowaniem proporcji, przycięcie do kwadratu
+            return mark_safe(
+                f'<img src="{self.photo.url}" style="width: 100px; height: 100px; object-fit: cover; border-radius: 5px;" />'
+            )
         return "No Image"
