@@ -12,9 +12,9 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import os
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 
-load_dotenv()
+# load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -29,10 +29,29 @@ SECRET_KEY = 'django-insecure-8y-w%mw_d54)eju2owinm0z1%m(myuotr2ibi*i8$8lwd@rb&_
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["amused-brave-dane.ngrok-free.app", 'localhost', "127.0.0.1"]
 
+# CSRF_TRUSTED_ORIGINS = [
+#     'https://amused-brave-dane.ngrok-free.app',  
+# ]
 
 # Application definition
+
+# Dzień dobry, 
+# Przepraszam, że pisze w złej kategorii ale nie mogłem znaleźć właściwej.
+# Mam pytania odnośnie API OLX ponieważ chce stworzyć aplikacje internetową na potrzeby pracy inżynierskiej. 
+
+# Czy możliwe jest podanie jako URI localhost:8000? 
+# Na razie wysłałem zgłoszenie aplikacji którą postawiłem na ngroku, aby mieć darmowy adres publiczny. 
+
+# Czy przez API OLX możliwe jest tworzenie ogłoszeń za darmo? bo to co jest w sekcji częste pytania wydaje się być dla mnie niejasne.
+
+
+
+
+
+
+
 
 INSTALLED_APPS = [
     'jazzmin',
@@ -55,6 +74,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    # 'project.middleware.NgrokSkipWarningMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -82,7 +102,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'project.wsgi.application'
+# WSGI_APPLICATION = 'project.wsgi.application'
 
 
 INTERNAL_IPS = [
@@ -101,26 +121,26 @@ INTERNAL_IPS = [
 #     }
 # }
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',  # Ustawienie silnika na PostgreSQL
-#         'NAME': 'SELLIT_AI_DB',               # Nazwa bazy danych
-#         'USER': 'postgres',                    # Nazwa użytkownika bazy danych
-#         'PASSWORD': 'password',                # Hasło użytkownika bazy danych
-#         'HOST': 'localhost',                        # Adres hosta, np. 'localhost' dla lokalnego serwera
-#         'PORT': '5433',                             # Port PostgreSQL, domyślnie 5432
-#     }
-# }
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DATABASE_NAME'),
-        'USER': os.environ.get('DATABASE_USER'),
-        'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
-        'HOST': os.environ.get('DATABASE_HOST'), # For local development, use 'localhost' or '127.0.0.1'
-        'PORT': os.environ.get('DATABASE_PORT'), # Default PostgreSQL port is usually '5432' 
+        'ENGINE': 'django.db.backends.postgresql',  # Ustawienie silnika na PostgreSQL
+        'NAME': 'sellit_ai_db',               # Nazwa bazy danych
+        'USER': 'postgres',                    # Nazwa użytkownika bazy danych
+        'PASSWORD': 'password',                # Hasło użytkownika bazy danych
+        'HOST': 'localhost',                        # Adres hosta, np. 'localhost' dla lokalnego serwera
+        'PORT': '5432',                             # Port PostgreSQL, domyślnie 5432
     }
 }
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': os.environ.get('DATABASE_NAME'),
+#         'USER': os.environ.get('DATABASE_USER'),
+#         'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
+#         'HOST': os.environ.get('DATABASE_HOST'), # For local development, use 'localhost' or '127.0.0.1'
+#         'PORT': os.environ.get('DATABASE_PORT'), # Default PostgreSQL port is usually '5432' 
+#     }
+# }
 
 LOGIN_URL = '/accounts/login/'  # URL for the login view
 LOGIN_REDIRECT_URL = '/admin/'  # Redirect to the admin after login
@@ -287,8 +307,8 @@ JAZZMIN_SETTINGS = {
     # UI Tweaks #
     #############
     # Relative paths to custom CSS/JS scripts (must be present in static files)
-    "custom_css": None,
-    "custom_js": 'js/dynamic_image_preview.js',
+    "custom_css": 'css/custom-css.css',
+    "custom_js": 'js/custom-js.js',
     # Whether to link font from fonts.googleapis.com (use custom_css to supply font otherwise)
     "use_google_fonts_cdn": True,
     # Whether to show the UI customizer on the sidebar

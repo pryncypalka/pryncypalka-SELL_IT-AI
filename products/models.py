@@ -10,6 +10,20 @@ class Category(models.Model):
         if self.parent:
             return f"{self.category_name} (Subcategory of {self.parent.category_name})"
         return self.category_name
+    
+    def get_subcategories(self):
+        """
+        Recursive method to retrieve all subcategories.
+        """
+        subcategories = []
+        for subcategory in self.subcategories.all():
+            subcategories.append({
+                'id': subcategory.id,
+                'name': subcategory.category_name,
+                'image': subcategory.image.url if subcategory.image else None,
+                'subcategories': subcategory.get_subcategories()
+            })
+        return subcategories
 
     class Meta:
         verbose_name_plural = "Categories"

@@ -1,0 +1,1 @@
+$('#category-custom-modal').appendTo("body");

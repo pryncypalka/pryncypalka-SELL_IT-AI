@@ -1,8 +1,9 @@
 from django.contrib import admin
+from django.urls import path
 from .models import Offer, Photo
-
-
-    
+from products.models import Category
+from .forms import CategorySelectWidget
+        
 class PhotoInline(admin.TabularInline):
     model = Photo
     extra = 1 
@@ -14,19 +15,28 @@ class PhotoInline(admin.TabularInline):
             return obj.image_tag()
         return "No Image"
 
+# class OfferAdmin(admin.ModelAdmin):
+#     list_display = ('title', 'description')  
+#     inlines = [PhotoInline]
+
+#     # Określ kolejność pól w formularzu
+#     fields = ['title','category', 'description', 'price']
+    
+#     def save_model(self, request, obj, form, change):
+#         if not obj.pk: 
+#             obj.user = request.user
+#         super().save_model(request, obj, form, change)
 
 
 class OfferAdmin(admin.ModelAdmin):
     list_display = ('title', 'description')  
     inlines = [PhotoInline]
-
-    # Określ kolejność pól w formularzu
     fields = ['title','category', 'description', 'price']
+    raw_id_fields = ['category']
     
-    def save_model(self, request, obj, form, change):
-        if not obj.pk: 
-            obj.user = request.user
-        super().save_model(request, obj, form, change)
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "category":
+            kwargs['widget'] = CategorySelectWidget()
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
-    
 admin.site.register(Offer, OfferAdmin)
