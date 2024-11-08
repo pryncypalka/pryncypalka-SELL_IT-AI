@@ -4,7 +4,7 @@ import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'project.settings')
 django.setup()
 
-from products.models import Category
+from offers.models import Category
 
 def populate_data():
     # Definicja drzewa kategorii

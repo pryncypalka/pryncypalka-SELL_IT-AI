@@ -24,12 +24,9 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('dashboard/', include('dashboard.urls', namespace='dashboard')),
     path("accounts/", include("django.contrib.auth.urls")),
-    path('api/', include('api.urls', namespace='api')),
     path('integrations/', include('integrations.urls', namespace='integrations')),
-    path('offer_templates/', include('offer_templates.urls', namespace='offer_templates')),
     path('offers/', include('offers.urls', namespace='offers')),
     path('orders/', include('orders.urls', namespace='orders')),
-    path('products/', include('products.urls', namespace='products')),
     path('reporting/', include('reporting.urls', namespace='reporting')),
     
 ] 

@@ -1,10 +1,41 @@
 from django.db import models
 from django.utils import timezone
 from django.conf import settings
-from products.models import Category
+from django.utils.html import mark_safe
+
 import os
 import uuid
-from django.utils.html import mark_safe
+
+
+class Category(models.Model):
+    category_name = models.CharField(max_length=255, null=False)
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='subcategories')
+    image = models.ImageField(upload_to='images/', null=True, blank=True)  
+
+    def __str__(self):
+        if self.parent:
+            return f"{self.category_name} (Subcategory of {self.parent.category_name})"
+        return self.category_name
+    
+    def get_subcategories(self):
+        """
+        Recursive method to retrieve all subcategories.
+        """
+        subcategories = []
+        for subcategory in self.subcategories.all():
+            subcategories.append({
+                'id': subcategory.id,
+                'name': subcategory.category_name,
+                'image': subcategory.image.url if subcategory.image else None,
+                'subcategories': subcategory.get_subcategories()
+            })
+        return subcategories
+
+    class Meta:
+        verbose_name_plural = "Categories"
+
+
+
 
 def get_file_path(instance, filename):
     ext = filename.split('.')[-1]
@@ -40,7 +71,6 @@ class Photo(models.Model):
     
     def image_tag(self):
         if self.photo:
-            # Wyświetlanie obrazu z zachowaniem proporcji, przycięcie do kwadratu
             return mark_safe(
                 f'<img src="{self.photo.url}" style="width: 100px; height: 100px; object-fit: cover; border-radius: 5px;" />'
             )

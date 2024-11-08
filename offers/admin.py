@@ -1,7 +1,5 @@
 from django.contrib import admin
-from django.urls import path
-from .models import Offer, Photo
-from products.models import Category
+from .models import Offer, Photo, Category
 from .forms import CategorySelectWidget
         
 class PhotoInline(admin.TabularInline):
@@ -32,3 +30,10 @@ class OfferAdmin(admin.ModelAdmin):
         super().save_model(request, obj, form, change)
 
 admin.site.register(Offer, OfferAdmin)
+
+
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ('category_name',)  # Fields to display in the category list view
+
+
