@@ -23,7 +23,6 @@ class CategorySelectWidget(forms.Select):
         try:
             category = Category.objects.get(id=value)
             category_name = category.category_name
-            print(category_name)
         except Category.DoesNotExist:
             category_name = "Select category"
         
@@ -34,6 +33,21 @@ class CategorySelectWidget(forms.Select):
 
         return context
 
-    
+
+class DescriptionWidget(forms.Textarea):
+    template_name = 'offers/description_widget.html'
+
+    def render(self, name, value, attrs=None, renderer=None):
+        if attrs is None:
+            attrs = {}
+        attrs['id'] = 'id_description'
+        
+        textarea_html = super().render(name, value, attrs, renderer)
+        
+     
+        return textarea_html
+
+    class Media:
+        js = ('js/description_generator.js',)
 
        
