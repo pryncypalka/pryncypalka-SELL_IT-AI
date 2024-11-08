@@ -1,9 +1,8 @@
 from django import forms
-from django.utils.html import escapejs
-from django.core.serializers import serialize
 from .models import Category
 from django import forms
 from .models import Category
+
 
 class CategorySelectWidget(forms.Select):
     template_name = 'offers/category_select.html'  
@@ -21,10 +20,18 @@ class CategorySelectWidget(forms.Select):
             }
             for category in top_level_categories
         ]
+        try:
+            category = Category.objects.get(id=value)
+            category_name = category.category_name
+            print(category_name)
+        except Category.DoesNotExist:
+            category_name = "Select category"
         
         context['categories_data'] = categories_data  
         context['name'] = name
         context['value'] = value
+        context['selected_category'] = category_name
+
         return context
 
     
