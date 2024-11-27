@@ -19,6 +19,13 @@ load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# allegro settings
+ALLEGRO_REDIRECT_URI = 'http://localhost:8000/allegro/callback'
+ALLEGRO_SANDBOX = True
+ALLEGRO_CLIENT_ID = os.getenv("ALLEGRO_CLIENT_ID", None)
+ALLEGRO_CLIENT_SECRET = os.getenv("ALLEGRO_CLIENT_SECRET", None)
+ALLEGRO_TOKEN_URL = "https://allegro.pl.allegrosandbox.pl/auth/oauth/token"
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -66,7 +73,6 @@ INSTALLED_APPS = [
     'dashboard',
     'offers',
     'integrations',
-    "reporting",
 ]
 
 MIDDLEWARE = [
@@ -138,8 +144,11 @@ DATABASES = {
 #     }
 # }
 
-LOGIN_URL = '/accounts/login/'  # URL for the login view
-LOGIN_REDIRECT_URL = '/admin/'  # Redirect to the admin after login
+LOGIN_REDIRECT_URL = 'dashboard:dashboard_home'
+LOGIN_URL = 'accounts:login'
+LOGOUT_REDIRECT_URL = 'accounts:logout'
+
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
