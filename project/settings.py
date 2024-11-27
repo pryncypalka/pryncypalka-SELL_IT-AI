@@ -66,7 +66,6 @@ INSTALLED_APPS = [
     'dashboard',
     'offers',
     'integrations',
-    'orders',
     "reporting",
 ]
 

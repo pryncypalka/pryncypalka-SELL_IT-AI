@@ -26,12 +26,10 @@ urlpatterns = [
     path("accounts/", include("django.contrib.auth.urls")),
     path('integrations/', include('integrations.urls', namespace='integrations')),
     path('offers/', include('offers.urls', namespace='offers')),
-    path('orders/', include('orders.urls', namespace='orders')),
     path('reporting/', include('reporting.urls', namespace='reporting')),
-    
 ] 
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += [path('__debug__/', include('debug_toolbar.urls'))]
-    urlpatterns += [ path('', admin.site.urls)]
+    urlpatterns += [ path('/admin', admin.site.urls)]
