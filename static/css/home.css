@@ -1,0 +1,28 @@
+.nav-link {
+    padding: 0.8rem 1.5rem;
+    transition: all 0.3s;
+}
+
+.nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-link.active {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-left: 4px solid #0d6efd;
+}
+
+.sub-nav {
+    margin-left: 3.2rem;
+    font-size: 0.9rem;
+}
+
+.sub-nav .nav-link {
+    padding: 0.5rem 1rem;
+}
+
+.section-title {
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    padding: 1.5rem 1.5rem 0.5rem;
+}

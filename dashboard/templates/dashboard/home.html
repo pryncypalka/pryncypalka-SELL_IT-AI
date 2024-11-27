@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_head %}
+{% endblock %}
+
+{% block content %}
+<div class="d-flex">
+    <!-- Sidebar -->
+    <div class="d-flex flex-column flex-shrink-0 bg-dark text-white" style="width: 280px; min-height: 100vh;">
+        <!-- Brand -->
+        <a href="{% url 'dashboard:dashboard_home' %}" class="d-flex align-items-center text-white text-decoration-none p-3">
+            <img src="{% static 'assets/logo.png' %}" alt="SELLIT_AI" class="me-2" width="32" height="32">
+            <span class="fs-5">SELLIT_AI</span>
+        </a>
+
+        <!-- Main Navigation -->
+        <ul class="nav flex-column mb-auto mt-2">
+            <li>
+                <a href="{% url 'dashboard:dashboard_home' %}" class="nav-link text-white {% if request.resolver_match.url_name == 'dashboard_home' %}active{% endif %}">
+                    <i class="fas fa-home me-3"></i>
+                    Strona główna
+                </a>
+            </li>
+
+            <li>
+                <a href="#productSubmenu" data-bs-toggle="collapse" class="nav-link text-white d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="fas fa-box me-3"></i>
+                        Produkty
+                    </div>
+                    <i class="fas fa-chevron-down"></i>
+                </a>
+                <div class="collapse" id="productSubmenu">
+                    <div class="sub-nav">
+                        <a href="#" class="nav-link text-white">
+                            Lista produktów
+                        </a>
+                        <a href="#" class="nav-link text-white">
+                            Kontrola magazynu
+                        </a>
+                        <a href="#" class="nav-link text-white">
+                            Import/Export
+                        </a>
+                    </div>
+                </div>
+            </li>
+
+            <li>
+                <a href="#" class="nav-link text-white">
+                    <i class="fas fa-shopping-cart me-3"></i>
+                    Zamówienia
+                </a>
+            </li>
+
+            <li>
+                <a href="#" class="nav-link text-white">
+                    <i class="fas fa-plug me-3"></i>
+                    Integracje
+                </a>
+            </li>
+
+            <li>
+                <a href="#" class="nav-link text-white">
+                    <i class="fas fa-cog me-3"></i>
+                    Ustawienia
+                </a>
+            </li>
+
+            <li class="mt-4">
+                <div class="section-title text-secondary">
+                    MARKETPLACE
+                </div>
+                <a href="#" class="nav-link text-white">
+                    <i class="fas fa-store me-3"></i>
+                    Allegro
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-grow-1">
+        <!-- Top Bar -->
+        <nav class="navbar navbar-expand-lg border-bottom">
+            <div class="container-fluid">
+                <div class="d-flex align-items-center">
+                    <div class="input-group">
+                        <span class="input-group-text border-end-0">
+                            <i class="fas fa-search text-muted"></i>
+                        </span>
+                        <input type="text" class="form-control border-start-0" placeholder="Szukaj...">
+                    </div>
+                </div>
+                
+                <div class="d-flex align-items-center">
+                    <a href="#" class="btn btn-warning me-2">
+                        <i class="fas fa-question-circle"></i>
+                    </a>
+                    <a href="#" class="btn btn-info me-2">
+                        <i class="fas fa-bell"></i>
+                    </a>
+                    <div class="dropdown">
+                        <button class="btn btn-primary dropdown-toggle d-flex align-items-center" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle me-2"></i>
+                            {{ request.user.username }}
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="#">
+                                <i class="fas fa-user-cog me-2"></i> Ustawienia profilu
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#">
+                                <i class="fas fa-sign-out-alt me-2"></i> Wyloguj
+                            </a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <div class="container-fluid p-4">
+            {% block dashboard_content %}{% endblock %}
+        </div>
+    </div>
+</div>
+{% endblock %}
