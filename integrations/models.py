@@ -20,18 +20,19 @@ class AllegroToken(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def refresh_if_needed(self):
-        if self.expires_at <= timezone.now() + timezone.timedelta(minutes=5):
-            try:
-                allegro = get_allegro_client()
-                token_data = allegro.refresh_access_token(self.refresh_token)
-                
-                self.access_token = token_data['access_token']
-                self.refresh_token = token_data['refresh_token']
-                self.expires_at = timezone.now() + timezone.timedelta(seconds=token_data['expires_in'])
-                self.save()
-            except Exception:
-                return False
-        return True
+        try:
+            allegro = get_allegro_client()
+            token_data = allegro.refresh_access_token(self.refresh_token)
+            
+            self.access_token = token_data['access_token'] 
+            self.refresh_token = token_data['refresh_token']
+            self.expires_at = timezone.now() + timezone.timedelta(seconds=token_data['expires_in'])
+            self.save()
+            return True
+        except Exception as e:
+            print(f"Refresh failed: {str(e)}")
+            return False
+      
 
     def is_valid(self):
         try:

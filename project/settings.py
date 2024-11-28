@@ -13,6 +13,10 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+import os
+import psycopg2
+from psycopg2 import OperationalError
+
 
 load_dotenv()
 
@@ -123,16 +127,16 @@ INTERNAL_IPS = [
 #     }
 # }
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',  # Ustawienie silnika na PostgreSQL
-        'NAME': 'sellit_ai_db',               # Nazwa bazy danych
-        'USER': 'postgres',                    # Nazwa użytkownika bazy danych
-        'PASSWORD': 'password',                # Hasło użytkownika bazy danych
-        'HOST': 'localhost',                        # Adres hosta, np. 'localhost' dla lokalnego serwera
-        'PORT': '5432',                             # Port PostgreSQL, domyślnie 5432
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',  # Ustawienie silnika na PostgreSQL
+#         'NAME': 'sellit_ai_db',               # Nazwa bazy danych
+#         'USER': 'postgres',                    # Nazwa użytkownika bazy danych
+#         'PASSWORD': 'password',                # Hasło użytkownika bazy danych
+#         'HOST': 'localhost',                        # Adres hosta, np. 'localhost' dla lokalnego serwera
+#         'PORT': '5432',                             # Port PostgreSQL, domyślnie 5432
+#     }
+# }
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',
@@ -143,6 +147,50 @@ DATABASES = {
 #         'PORT': os.environ.get('DATABASE_PORT'), # Default PostgreSQL port is usually '5432' 
 #     }
 # }
+
+def select_database():
+    databases = [
+        {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('DATABASE_NAME'),
+        'USER': os.environ.get('DATABASE_USER'),
+        'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
+        'HOST': os.environ.get('DATABASE_HOST'), # For local development, use 'localhost' or '127.0.0.1'
+        'PORT': os.environ.get('DATABASE_PORT'), # Default PostgreSQL port is usually '5432'
+        },
+        {
+        'ENGINE': 'django.db.backends.postgresql',  # Ustawienie silnika na PostgreSQL
+        'NAME': 'sellit_ai_db',               # Nazwa bazy danych
+        'USER': 'postgres',                    # Nazwa użytkownika bazy danych
+        'PASSWORD': 'password',                # Hasło użytkownika bazy danych
+        'HOST': 'localhost',                        # Adres hosta, np. 'localhost' dla lokalnego serwera
+        'PORT': '5432',                             # Port PostgreSQL, domyślnie 5432
+        },
+    ]
+    
+    for db_config in databases:
+        try:
+            # Próba połączenia z bazą danych
+            conn = psycopg2.connect(
+                dbname=db_config['NAME'],
+                user=db_config['USER'],
+                password=db_config['PASSWORD'],
+                host=db_config['HOST'],
+                port=db_config['PORT'],
+            )
+            conn.close()  # Połączenie się udało, baza działa
+            print(f"Connected to database: {db_config['NAME']}")
+            return db_config
+        except OperationalError as e:
+            print(f"Could not connect to database {db_config['NAME']}: {str(e)}")
+    
+    raise RuntimeError("No available databases")
+
+# Wybierz bazę dynamicznie
+DATABASES = {
+    'default': select_database()
+}
+
 
 LOGIN_REDIRECT_URL = 'dashboard:dashboard_home'
 LOGIN_URL = 'accounts:login'
@@ -312,7 +360,7 @@ JAZZMIN_SETTINGS = {
     # UI Tweaks #
     #############
     # Relative paths to custom CSS/JS scripts (must be present in static files)
-    "custom_css": 'css/custom-css.css',
+    "custom_css": False,
     "custom_js": 'js/custom-js.js',
     # Whether to link font from fonts.googleapis.com (use custom_css to supply font otherwise)
     "use_google_fonts_cdn": True,
@@ -371,3 +419,17 @@ X_FRAME_OPTIONS = 'SAMEORIGIN'
 
 MEDIA_URL = '/uploads/'
 MEDIA_ROOT = '/app/uploads'
+
+
+
+CELERY_BROKER_URL = 'redis://redis:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+
+
+CELERY_BEAT_SCHEDULE = {
+    'refresh-allegro-tokens': {
+        'task': 'integrations.tasks.refresh_allegro_tokens',
+        'schedule': 1800.0 
+    },
+}

@@ -84,19 +84,24 @@ class AllegroAuth:
         return response.json()
 
     def refresh_access_token(self, refresh_token: str) -> Dict:
-        """Refresh existing token pair"""
         data = {
             'grant_type': 'refresh_token',
             'refresh_token': refresh_token
         }
         
-        response = requests.post(
-            self.token_url, 
-            data=data,
-            auth=(self.client_id, self.client_secret)
-        )
-        response.raise_for_status()
-        return response.json()
+        try:
+            response = requests.post(
+                self.token_url,
+                data=data,
+                auth=(self.client_id, self.client_secret),
+                allow_redirects=False,
+                
+            )
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.HTTPError as e:
+            print(f"API Error Response: {e.response.text}")
+            raise
 
     def make_request(self, endpoint: str, method: str = 'GET', 
                     access_token: Optional[str] = None, **kwargs) -> requests.Response:
