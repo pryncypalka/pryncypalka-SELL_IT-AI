@@ -1,0 +1,66 @@
+{% extends "dashboard/home.html" %}
+{% block dashboard_content %}
+
+<div class="container-fluid">
+    <!-- Connection Status -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">Allegro Configuration Status</h5>
+                <button class="btn btn-primary btn-sm">Reconfigure</button>
+            </div>
+            
+            <div class="progress mb-2" style="height: 10px;">
+                <div class="progress-bar bg-primary" role="progressbar" style="width: {{ config_percentage }}%;" 
+                     aria-valuenow="{{ config_percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <small>Configuration progress: {{ config_percentage }}%</small>
+        </div>
+    </div>
+
+    <!-- Configuration Cards -->
+    <div class="row g-4">
+        {% for config in config_items %}
+        <div class="col-md-4">
+            <div class="card h-100" data-bs-toggle="modal" data-bs-target="#configModal{{ config.id }}" style="cursor: pointer">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2 text-muted">{{ config.title }}</h6>
+                            <p class="card-text small">{{ config.description }}</p>
+                        </div>
+                        {% if config.is_configured %}
+                            <i class="fas fa-check-circle text-success fs-4"></i>
+                        {% else %}
+                            <i class="fas fa-times-circle text-danger fs-4"></i>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal for each config item -->
+        <div class="modal fade" id="configModal{{ config.id }}" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">{{ config.title }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        {% comment %} <form method="post" action="{% url 'dashboard:allegro_config_update' config.id %}">
+                            {% csrf_token %}
+                            <!-- Form fields will be added here -->
+                            <div class="text-end">
+                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                            </div>
+                        </form> {% endcomment %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends "dashboard/home.html" %}
+{% block dashboard_content %}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                        <div class="alert {{ message.tags }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Allegro Integration</h5>
+
+                    {% if is_connected %}
+                        <div class="alert alert-success d-flex align-items-center" role="alert">
+                            <div>
+                                Connected to Allegro
+                                {% if token_expires %}
+                                    <span class="small">Token expires: {{ token_expires|date:"Y-m-d H:i" }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mt-3">
+                            <div class="alert alert-info">
+                                To disconnect from Allegro:
+                                <ol>
+                                    <li>Go to your Allegro account settings</li>
+                                    <li>Find "Connected Applications" section</li>
+                                    <li>Remove access for this application</li>
+                                </ol>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-warning d-flex align-items-center" role="alert">
+                            <div>Not connected to Allegro</div>
+                        </div>
+                        <a href="{% url 'dashboard:allegro_connect' %}" class="btn btn-primary">Connect with Allegro</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

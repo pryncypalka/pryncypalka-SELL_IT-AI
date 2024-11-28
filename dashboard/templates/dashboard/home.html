@@ -8,73 +8,65 @@
 <div class="d-flex">
     <!-- Sidebar -->
     <div class="d-flex flex-column flex-shrink-0 bg-dark text-white" style="width: 280px; min-height: 100vh;">
-        <!-- Brand -->
         <a href="{% url 'dashboard:dashboard_home' %}" class="d-flex align-items-center text-white text-decoration-none p-3">
-            <img src="{% static 'assets/logo.png' %}" alt="SELLIT_AI" class="me-2" width="32" height="32">
+            <img src="{% static 'assets/logo.png' %}" class="me-2" width="32" height="32">
             <span class="fs-5">SELLIT_AI</span>
         </a>
 
-        <!-- Main Navigation -->
-        <ul class="nav flex-column mb-auto mt-2">
+        <ul class="nav nav-pills flex-column mb-auto">
             <li>
                 <a href="{% url 'dashboard:dashboard_home' %}" class="nav-link text-white {% if request.resolver_match.url_name == 'dashboard_home' %}active{% endif %}">
-                    <i class="fas fa-home me-3"></i>
-                    Strona główna
+                    Dashboard
                 </a>
             </li>
-
+            
             <li>
-                <a href="#productSubmenu" data-bs-toggle="collapse" class="nav-link text-white d-flex justify-content-between align-items-center">
-                    <div>
-                        <i class="fas fa-box me-3"></i>
-                        Produkty
-                    </div>
+                <a href="#" class="nav-link text-white d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#productSubmenu">
+                    <div>Products</div>
                     <i class="fas fa-chevron-down"></i>
                 </a>
                 <div class="collapse" id="productSubmenu">
-                    <div class="sub-nav">
-                        <a href="#" class="nav-link text-white">
-                            Lista produktów
-                        </a>
-                        <a href="#" class="nav-link text-white">
-                            Kontrola magazynu
-                        </a>
-                        <a href="#" class="nav-link text-white">
-                            Import/Export
-                        </a>
-                    </div>
+                    <ul class="nav flex-column ms-3">
+                        <li><a href="#" class="nav-link text-white">List of products</a></li>
+                        <li><a href="#" class="nav-link text-white">Inventory Control</a></li>
+                        <li><a href="#" class="nav-link text-white">Import/Export</a></li>
+                    </ul>
                 </div>
             </li>
 
             <li>
-                <a href="#" class="nav-link text-white">
-                    <i class="fas fa-shopping-cart me-3"></i>
-                    Zamówienia
-                </a>
+                <a href="#" class="nav-link text-white">Orders</a>
             </li>
 
             <li>
-                <a href="#" class="nav-link text-white">
-                    <i class="fas fa-plug me-3"></i>
-                    Integracje
+                <a href="#" class="nav-link text-white d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#integrationsSubmenu">
+                    <div>Integrations</div>
+                    <i class="fas fa-chevron-down"></i>
                 </a>
-            </li>
-
-            <li>
-                <a href="#" class="nav-link text-white">
-                    <i class="fas fa-cog me-3"></i>
-                    Ustawienia
-                </a>
-            </li>
-
-            <li class="mt-4">
-                <div class="section-title text-secondary">
-                    MARKETPLACE
+                <div class="collapse" id="integrationsSubmenu">
+                    <ul class="nav flex-column ms-3">
+                        <li>
+                            <a href="#" class="nav-link text-white d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#allegroSubmenu">
+                                <div>Allegro</div>
+                                <i class="fas fa-chevron-down"></i>
+                            </a>
+                            <div class="collapse" id="allegroSubmenu">
+                                <ul class="nav flex-column ms-3">
+                                    <li><a href="{% url 'dashboard:allegro_integration' %}" class="nav-link text-white">Settings</a></li>
+                                    <li><a href="{% url 'dashboard:allegro_configuration' %}" class="nav-link text-white">Configuration</a></li>
+                                    <li><a href="#" class="nav-link text-white">Categories</a></li>
+                                    <li><a href="#" class="nav-link text-white">Offers</a></li>
+                                    <li><a href="#" class="nav-link text-white">Sales</a></li>
+                                    <li><a href="#" class="nav-link text-white">Parameters</a></li>
+                                </ul>
+                            </div>
+                        </li>
+                    </ul>
                 </div>
-                <a href="#" class="nav-link text-white">
-                    <i class="fas fa-store me-3"></i>
-                    Allegro
-                </a>
+            </li>
+
+            <li>
+                <a href="#" class="nav-link text-white">Settings</a>
             </li>
         </ul>
     </div>
@@ -107,12 +99,17 @@
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="#">
-                                <i class="fas fa-user-cog me-2"></i> Ustawienia profilu
+                                <i class="fas fa-user-cog me-2"></i> Settings
                             </a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#">
-                                <i class="fas fa-sign-out-alt me-2"></i> Wyloguj
-                            </a></li>
+                            <li>
+                                <form method="post" action="{% url 'accounts:logout' %}" class="dropdown-item p-0">
+                                    {% csrf_token %}
+                                    <button type="submit" class="dropdown-item">
+                                        <i class="fas fa-sign-out-alt me-2"></i> Log out
+                                    </button>
+                                </form>
+                            </li>
                         </ul>
                     </div>
                 </div>
