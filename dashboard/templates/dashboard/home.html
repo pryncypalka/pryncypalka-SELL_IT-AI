@@ -16,48 +16,88 @@
         <ul class="nav nav-pills flex-column mb-auto">
             <li>
                 <a href="{% url 'dashboard:dashboard_home' %}" class="nav-link text-white {% if request.resolver_match.url_name == 'dashboard_home' %}active{% endif %}">
+                    <i class="fas fa-home me-3"></i>
                     Dashboard
                 </a>
             </li>
             
             <li>
                 <a href="#" class="nav-link text-white d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#productSubmenu">
-                    <div>Products</div>
+                    <div>
+                        <i class="fas fa-box me-3"></i>
+                        Products
+                    </div>
                     <i class="fas fa-chevron-down"></i>
                 </a>
                 <div class="collapse" id="productSubmenu">
                     <ul class="nav flex-column ms-3">
-                        <li><a href="#" class="nav-link text-white">List of products</a></li>
-                        <li><a href="#" class="nav-link text-white">Inventory Control</a></li>
-                        <li><a href="#" class="nav-link text-white">Import/Export</a></li>
+                        <li><a href="#" class="nav-link text-white">
+                            <i class="fas fa-list me-2"></i>
+                            List of products
+                        </a></li>
+                        <li><a href="#" class="nav-link text-white">
+                            <i class="fas fa-warehouse me-2"></i>
+                            Inventory Control
+                        </a></li>
+                        <li><a href="#" class="nav-link text-white">
+                            <i class="fas fa-file-import me-2"></i>
+                            Import/Export
+                        </a></li>
                     </ul>
                 </div>
             </li>
 
             <li>
-                <a href="#" class="nav-link text-white">Orders</a>
+                <a href="#" class="nav-link text-white">
+                    <i class="fas fa-shopping-cart me-3"></i>
+                    Orders
+                </a>
             </li>
 
             <li>
                 <a href="#" class="nav-link text-white d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#integrationsSubmenu">
-                    <div>Integrations</div>
+                    <div>
+                        <i class="fas fa-plug me-3"></i>
+                        Integrations
+                    </div>
                     <i class="fas fa-chevron-down"></i>
                 </a>
                 <div class="collapse" id="integrationsSubmenu">
                     <ul class="nav flex-column ms-3">
                         <li>
                             <a href="#" class="nav-link text-white d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#allegroSubmenu">
-                                <div>Allegro</div>
+                                <div>
+                                    <i class="fas fa-store me-3"></i>
+                                    Allegro
+                                </div>
                                 <i class="fas fa-chevron-down"></i>
                             </a>
                             <div class="collapse" id="allegroSubmenu">
                                 <ul class="nav flex-column ms-3">
-                                    <li><a href="{% url 'dashboard:allegro_integration' %}" class="nav-link text-white">Settings</a></li>
-                                    <li><a href="{% url 'dashboard:allegro_configuration' %}" class="nav-link text-white">Configuration</a></li>
-                                    <li><a href="#" class="nav-link text-white">Categories</a></li>
-                                    <li><a href="#" class="nav-link text-white">Offers</a></li>
-                                    <li><a href="#" class="nav-link text-white">Sales</a></li>
-                                    <li><a href="#" class="nav-link text-white">Parameters</a></li>
+                                    <li><a href="{% url 'dashboard:allegro_integration' %}" class="nav-link text-white">
+                                        <i class="fas fa-cogs me-2"></i>
+                                        Settings
+                                    </a></li>
+                                    <li><a href="{% url 'dashboard:allegro_configuration' %}" class="nav-link text-white">
+                                        <i class="fas fa-sliders-h me-2"></i>
+                                        Configuration
+                                    </a></li>
+                                    <li><a href="#" class="nav-link text-white">
+                                        <i class="fas fa-th-list me-2"></i>
+                                        Categories
+                                    </a></li>
+                                    <li><a href="#" class="nav-link text-white">
+                                        <i class="fas fa-tags me-2"></i>
+                                        Offers
+                                    </a></li>
+                                    <li><a href="#" class="nav-link text-white">
+                                        <i class="fas fa-chart-line me-2"></i>
+                                        Sales
+                                    </a></li>
+                                    <li><a href="#" class="nav-link text-white">
+                                        <i class="fas fa-stream me-2"></i>
+                                        Parameters
+                                    </a></li>
                                 </ul>
                             </div>
                         </li>
@@ -66,7 +106,10 @@
             </li>
 
             <li>
-                <a href="#" class="nav-link text-white">Settings</a>
+                <a href="#" class="nav-link text-white">
+                    <i class="fas fa-cog me-3"></i>
+                    Settings
+                </a>
             </li>
         </ul>
     </div>
