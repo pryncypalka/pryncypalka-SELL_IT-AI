@@ -52,7 +52,7 @@ npm-debug.log*
 *.swo
 
 # Celery
-celerybeat-schedule.*
+celerybeat-schedule*
 
 # Jupyter Notebook
 .ipynb_checkpoints/
