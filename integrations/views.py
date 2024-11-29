@@ -5,6 +5,10 @@ from dotenv import load_dotenv
 from django.views import View
 from django.http import JsonResponse
 import json
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
+from django.contrib.auth.decorators import login_required
+from .services import AllegroOfferService
 
 # load_dotenv()
 
@@ -36,5 +40,4 @@ import json
             
 #         except Exception as e:
 #             return JsonResponse({"error": str(e)}, status=500)
-                
                 

@@ -29,7 +29,7 @@ ALLEGRO_SANDBOX = True
 ALLEGRO_CLIENT_ID = os.getenv("ALLEGRO_CLIENT_ID", None)
 ALLEGRO_CLIENT_SECRET = os.getenv("ALLEGRO_CLIENT_SECRET", None)
 ALLEGRO_TOKEN_URL = "https://allegro.pl.allegrosandbox.pl/auth/oauth/token"
-
+ALLEGRO_API_URL = "https://api.allegro.pl.allegrosandbox.pl"
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/

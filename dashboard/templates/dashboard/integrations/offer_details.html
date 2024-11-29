@@ -1,0 +1,194 @@
+{% extends "dashboard/home.html" %}
+
+{% block dashboard_content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">{{ offer.name }}</h5>
+                    <span class="badge bg-{{ offer.publication.status|lower }}">
+                        {{ offer.publication.status }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Product Information</h6>
+                            <dl class="row">
+                                <dt class="col-sm-4">Category</dt>
+                                <dd class="col-sm-8">{{ offer.category.id }}</dd>
+                                
+                                <dt class="col-sm-4">Price</dt>
+                                <dd class="col-sm-8">
+                                    {{ offer.sellingMode.price.amount }} {{ offer.sellingMode.price.currency }}
+                                </dd>
+                                
+                                <dt class="col-sm-4">Stock</dt>
+                                <dd class="col-sm-8">{{ offer.stock.available }} {{ offer.stock.unit }}</dd>
+                                
+                                <dt class="col-sm-4">Format</dt>
+                                <dd class="col-sm-8">{{ offer.sellingMode.format }}</dd>
+                            </dl>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Sales Information</h6>
+                            <dl class="row">
+                                <dt class="col-sm-4">Views</dt>
+                                <dd class="col-sm-8">{{ offer.stats.visitsCount }}</dd>
+                                
+                                <dt class="col-sm-4">Watchers</dt>
+                                <dd class="col-sm-8">{{ offer.stats.watchersCount }}</dd>
+                                
+                                <dt class="col-sm-4">Sold</dt>
+                                <dd class="col-sm-8">{{ offer.stock.sold }}</dd>
+                            </dl>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h6>Delivery Settings</h6>
+                            <dl class="row">
+                                <dt class="col-sm-3">Handling Time</dt>
+                                <dd class="col-sm-9">{{ offer.delivery.handlingTime }}</dd>
+                                
+                                <dt class="col-sm-3">Additional Info</dt>
+                                <dd class="col-sm-9">{{ offer.delivery.additionalInfo }}</dd>
+                            </dl>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h6>Location</h6>
+                            <dl class="row">
+                                <dt class="col-sm-3">City</dt>
+                                <dd class="col-sm-9">{{ offer.location.city }}</dd>
+                                
+                                <dt class="col-sm-3">Province</dt>
+                                <dd class="col-sm-9">{{ offer.location.province }}</dd>
+                                
+                                <dt class="col-sm-3">Post Code</dt>
+                                <dd class="col-sm-9">{{ offer.location.postCode }}</dd>
+                            </dl>
+                        </div>
+                    </div>
+                    
+                    {% if offer.parameters %}
+                    <hr>
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h6>Parameters</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Value</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for param in offer.parameters %}
+                                        <tr>
+                                            <td>{{ param.name }}</td>
+                                            <td>
+                                                {% if param.values %}
+                                                    {{ param.values|join:", " }}
+                                                {% elif param.rangeValue %}
+                                                    {{ param.rangeValue.from }} - {{ param.rangeValue.to }}
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    <div class="mt-4">
+                        <h6>Change history</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Change type</th>
+                                        
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for event in offer_events %}
+                                    <tr>
+                                        <td>{{ event.occurredAt|date:"Y-m-d H:i:s" }}</td>
+                                        <td>
+                                            <span class="badge {% if event.type == 'OFFER_ACTIVATED' %}bg-success
+                                                            {% elif event.type == 'OFFER_ENDED' %}bg-danger
+                                                            {% elif event.type == 'OFFER_STOCK_CHANGED' %}bg-warning
+                                                            {% elif event.type == 'OFFER_PRICE_CHANGED' %}bg-info
+                                                            {% else %}bg-secondary{% endif %}">
+                                                {{ event.type }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Publication Details</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-5">Start Date</dt>
+                        <dd class="col-sm-7">{{ offer.publication.startingAt|date:"Y-m-d H:i" }}</dd>
+                        
+                        <dt class="col-sm-5">End Date</dt>
+                        <dd class="col-sm-7">{{ offer.publication.endingAt|date:"Y-m-d H:i" }}</dd>
+                        
+                        <dt class="col-sm-5">Status</dt>
+                        <dd class="col-sm-7">
+                            <span class="badge bg-{{ offer.publication.status|lower }}">
+                                {{ offer.publication.status }}
+                            </span>
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+            
+            {% if offer.afterSalesServices %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">After Sales Services</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        {% if offer.afterSalesServices.impliedWarranty %}
+                        <dt class="col-sm-5">Warranty</dt>
+                        <dd class="col-sm-7">Yes</dd>
+                        {% endif %}
+                        
+                        {% if offer.afterSalesServices.returnPolicy %}
+                        <dt class="col-sm-5">Returns</dt>
+                        <dd class="col-sm-7">Yes</dd>
+                        {% endif %}
+                    </dl>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

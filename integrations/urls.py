@@ -6,6 +6,4 @@ app_name = 'integrations'
 
 urlpatterns = [
     # path("chatgpt/", ChatGPTView.as_view(), name="chatgpt"),
-
-
 ]
