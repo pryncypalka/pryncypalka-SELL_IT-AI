@@ -112,7 +112,7 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const categorySelect = document.querySelector('select[name="category.id"]');
+    const categorySelect = document.querySelector('[name="category.id"]');
     
     categorySelect.addEventListener('change', async function() {
         const categoryId = this.value;
