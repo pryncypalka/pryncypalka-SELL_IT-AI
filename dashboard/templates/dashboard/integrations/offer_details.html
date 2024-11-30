@@ -14,17 +14,17 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <h6>Product Information</h6>
+                            <h6>Informacje o produkcie</h6>
                             <dl class="row">
-                                <dt class="col-sm-4">Category</dt>
+                                <dt class="col-sm-4">Kategoria</dt>
                                 <dd class="col-sm-8">{{ offer.category.id }}</dd>
                                 
-                                <dt class="col-sm-4">Price</dt>
+                                <dt class="col-sm-4">Cena</dt>
                                 <dd class="col-sm-8">
                                     {{ offer.sellingMode.price.amount }} {{ offer.sellingMode.price.currency }}
                                 </dd>
                                 
-                                <dt class="col-sm-4">Stock</dt>
+                                <dt class="col-sm-4">Magazyn</dt>
                                 <dd class="col-sm-8">{{ offer.stock.available }} {{ offer.stock.unit }}</dd>
                                 
                                 <dt class="col-sm-4">Format</dt>
@@ -32,15 +32,15 @@
                             </dl>
                         </div>
                         <div class="col-md-6">
-                            <h6>Sales Information</h6>
+                            <h6>Informacje o sprzedaży</h6>
                             <dl class="row">
-                                <dt class="col-sm-4">Views</dt>
+                                <dt class="col-sm-4">Wyświetlenia</dt>
                                 <dd class="col-sm-8">{{ offer.stats.visitsCount }}</dd>
                                 
-                                <dt class="col-sm-4">Watchers</dt>
+                                <dt class="col-sm-4">Obserwujący</dt>
                                 <dd class="col-sm-8">{{ offer.stats.watchersCount }}</dd>
                                 
-                                <dt class="col-sm-4">Sold</dt>
+                                <dt class="col-sm-4">Sprzedano</dt>
                                 <dd class="col-sm-8">{{ offer.stock.sold }}</dd>
                             </dl>
                         </div>
@@ -50,12 +50,12 @@
                     
                     <div class="row mt-4">
                         <div class="col-12">
-                            <h6>Delivery Settings</h6>
+                            <h6>Opcje dostawy</h6>
                             <dl class="row">
-                                <dt class="col-sm-3">Handling Time</dt>
+                                <dt class="col-sm-3">Czas dostawy</dt>
                                 <dd class="col-sm-9">{{ offer.delivery.handlingTime }}</dd>
                                 
-                                <dt class="col-sm-3">Additional Info</dt>
+                                <dt class="col-sm-3">Informacje dodatkowe</dt>
                                 <dd class="col-sm-9">{{ offer.delivery.additionalInfo }}</dd>
                             </dl>
                         </div>
@@ -65,15 +65,15 @@
                     
                     <div class="row mt-4">
                         <div class="col-12">
-                            <h6>Location</h6>
+                            <h6>Lokalizacja</h6>
                             <dl class="row">
-                                <dt class="col-sm-3">City</dt>
+                                <dt class="col-sm-3">Miasto</dt>
                                 <dd class="col-sm-9">{{ offer.location.city }}</dd>
                                 
-                                <dt class="col-sm-3">Province</dt>
+                                <dt class="col-sm-3">Województwo</dt>
                                 <dd class="col-sm-9">{{ offer.location.province }}</dd>
                                 
-                                <dt class="col-sm-3">Post Code</dt>
+                                <dt class="col-sm-3">Kod pocztowy</dt>
                                 <dd class="col-sm-9">{{ offer.location.postCode }}</dd>
                             </dl>
                         </div>
@@ -83,13 +83,13 @@
                     <hr>
                     <div class="row mt-4">
                         <div class="col-12">
-                            <h6>Parameters</h6>
+                            <h6>Parametry</h6>
                             <div class="table-responsive">
                                 <table class="table table-sm">
                                     <thead>
                                         <tr>
-                                            <th>Name</th>
-                                            <th>Value</th>
+                                            <th>Nazwa</th>
+                                            <th>Wartość</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -112,13 +112,13 @@
                     </div>
                     {% endif %}
                     <div class="mt-4">
-                        <h6>Change history</h6>
+                        <h6>Historia zmian</h6>
                         <div class="table-responsive">
                             <table class="table table-sm">
                                 <thead>
                                     <tr>
-                                        <th>Date</th>
-                                        <th>Change type</th>
+                                        <th>Data</th>
+                                        <th>Rodzaj zmiany</th>
                                         
                                     </tr>
                                 </thead>
@@ -148,14 +148,14 @@
         <div class="col-md-4">
             <div class="card mb-4">
                 <div class="card-header">
-                    <h5 class="mb-0">Publication Details</h5>
+                    <h5 class="mb-0">Szczegóły publikacji</h5>
                 </div>
                 <div class="card-body">
                     <dl class="row">
-                        <dt class="col-sm-5">Start Date</dt>
+                        <dt class="col-sm-5">Data rozpoczęcia</dt>
                         <dd class="col-sm-7">{{ offer.publication.startingAt|date:"Y-m-d H:i" }}</dd>
                         
-                        <dt class="col-sm-5">End Date</dt>
+                        <dt class="col-sm-5">Data zakończenia</dt>
                         <dd class="col-sm-7">{{ offer.publication.endingAt|date:"Y-m-d H:i" }}</dd>
                         
                         <dt class="col-sm-5">Status</dt>
@@ -171,18 +171,18 @@
             {% if offer.afterSalesServices %}
             <div class="card mb-4">
                 <div class="card-header">
-                    <h5 class="mb-0">After Sales Services</h5>
+                    <h5 class="mb-0">Usługi posprzedażowe</h5>
                 </div>
                 <div class="card-body">
                     <dl class="row">
                         {% if offer.afterSalesServices.impliedWarranty %}
-                        <dt class="col-sm-5">Warranty</dt>
-                        <dd class="col-sm-7">Yes</dd>
+                        <dt class="col-sm-5">Gwarancja</dt>
+                        <dd class="col-sm-7">Tak</dd>
                         {% endif %}
                         
                         {% if offer.afterSalesServices.returnPolicy %}
-                        <dt class="col-sm-5">Returns</dt>
-                        <dd class="col-sm-7">Yes</dd>
+                        <dt class="col-sm-5">Zwroty</dt>
+                        <dd class="col-sm-7">Tak</dd>
                         {% endif %}
                     </dl>
                 </div>

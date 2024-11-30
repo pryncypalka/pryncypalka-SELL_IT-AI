@@ -15,13 +15,13 @@
         {% endif %}
         <div class="card-header">
             <div class="d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Allegro Offers</h5>
+                <h5 class="mb-0">Oferty na Allegro</h5>
                 <div class="btn-group">
                     <a href="{% url 'dashboard:allegro_offer_create' %}" class="btn btn-success">
-                        <i class="fas fa-plus"></i> Add Offer
+                        <i class="fas fa-plus"></i> Dodaj ofertę
                     </a>
                     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#filtersModal">
-                        <i class="fas fa-filter"></i> Filters
+                        <i class="fas fa-filter"></i> Filtry
                     </button>
                 </div>
             </div>
@@ -45,12 +45,12 @@
                             </div>
                             <div class="mt-2">
                                 <small class="text-muted">
-                                    Available: {{ offer.stock.available }} | Sold: {{ offer.stock.sold }}
+                                    Dostępne: {{ offer.stock.available }} | Sprzedano: {{ offer.stock.sold }}
                                 </small>
                             </div>
                         </div>
                         <div class="card-footer">
-                            <a href="{% url 'dashboard:allegro_offer_detail' offer_id=offer.id %}" class="btn btn-outline-primary">Details</a>
+                            <a href="{% url 'dashboard:allegro_offer_detail' offer_id=offer.id %}" class="btn btn-outline-primary">Szczegóły</a>
 
                         </div>
                     </div>
@@ -67,7 +67,7 @@
         <div class="modal-content">
             <form method="get">
                 <div class="modal-header">
-                    <h5 class="modal-title">Filter Offers</h5>
+                    <h5 class="modal-title">Filtr ofert</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
@@ -84,7 +84,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">Apply Filters</button>
+                    <button type="submit" class="btn btn-primary">Zastosuj filtry</button>
                 </div>
             </form>
         </div>

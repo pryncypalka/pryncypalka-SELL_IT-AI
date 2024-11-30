@@ -15,33 +15,33 @@
             {% endif %}
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">Allegro Integration</h5>
+                    <h5 class="card-title">Allegro Integracja</h5>
 
                     {% if is_connected %}
                         <div class="alert alert-success d-flex align-items-center" role="alert">
                             <div>
-                                Connected to Allegro
+                                Podłączono do Allegro
                                 {% if token_expires %}
-                                    <span class="small">Token expires: {{ token_expires|date:"Y-m-d H:i" }}</span>
+                                    <span class="small">Token wygaśnie: {{ token_expires|date:"Y-m-d H:i" }}</span>
                                 {% endif %}
                             </div>
                         </div>
 
                         <div class="mt-3">
                             <div class="alert alert-info">
-                                To disconnect from Allegro:
+                                Aby odłączyć aplikację od Allegro, wykonaj następujące kroki:
                                 <ol>
-                                    <li>Go to your Allegro account settings</li>
-                                    <li>Find "Connected Applications" section</li>
-                                    <li>Remove access for this application</li>
+                                    <li>Wejdź w ustawienia Allegro</li>
+                                    <li>Znajdź zakładkę Podłączone aplikacje</li>
+                                    <li>Usuń dostęp dla tej aplikacji</li>
                                 </ol>
                             </div>
                         </div>
                     {% else %}
                         <div class="alert alert-warning d-flex align-items-center" role="alert">
-                            <div>Not connected to Allegro</div>
+                            <div>Nie podłączono do Allegro</div>
                         </div>
-                        <a href="{% url 'dashboard:allegro_connect' %}" class="btn btn-primary">Connect with Allegro</a>
+                        <a href="{% url 'dashboard:allegro_connect' %}" class="btn btn-primary">Podłącz do Allegro</a>
                     {% endif %}
                 </div>
             </div>
