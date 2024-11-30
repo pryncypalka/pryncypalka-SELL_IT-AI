@@ -2,23 +2,23 @@
 {% block dashboard_content %}
 
 <div class="container-fluid">
-    <!-- Connection Status -->
+    <!-- Status połączenia -->
     <div class="card mb-4">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h5 class="mb-0">Status konfiguracji Allegro</h5>
-                <button class="btn btn-primary btn-sm">Reset konfiguracji</button>
+                <button class="btn btn-primary btn-sm">Zresetuj konfigurację</button>
             </div>
             
             <div class="progress mb-2" style="height: 10px;">
                 <div class="progress-bar bg-primary" role="progressbar" style="width: {{ config_percentage }}%;" 
                      aria-valuenow="{{ config_percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
             </div>
-            <small>Configuration progress: {{ config_percentage }}%</small>
+            <small>Postęp konfiguracji: {{ config_percentage }}%</small>
         </div>
     </div>
 
-    <!-- Configuration Cards -->
+    <!-- Karty konfiguracji -->
     <div class="row g-4">
         {% for config in config_items %}
         <div class="col-md-4">
@@ -39,7 +39,7 @@
             </div>
         </div>
 
-        <!-- Modal for each config item -->
+        <!-- Modal dla każdego elementu konfiguracji -->
         <div class="modal fade" id="configModal{{ config.id }}" tabindex="-1">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -50,9 +50,9 @@
                     <div class="modal-body">
                         {% comment %} <form method="post" action="{% url 'dashboard:allegro_config_update' config.id %}">
                             {% csrf_token %}
-                            <!-- Form fields will be added here -->
+                            <!-- Pola formularza zostaną tutaj dodane -->
                             <div class="text-end">
-                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                                <button type="submit" class="btn btn-primary">Zapisz zmiany</button>
                             </div>
                         </form> {% endcomment %}
                     </div>

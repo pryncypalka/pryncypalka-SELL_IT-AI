@@ -1,3 +1,4 @@
+from django.forms import ValidationError
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
@@ -82,43 +83,43 @@ def allegro_disconnect(request):
 @login_required
 def allegro_configuration(request):
     config_items = [
-        {
-            'id': 'auctions',
-            'title': 'Auction Settings',
-            'description': 'Configure default auction parameters',
-            'is_configured': False
-        },
-        {
-            'id': 'delivery',
-            'title': 'Delivery Settings',
-            'description': 'Set up shipping methods and costs',
-            'is_configured': False
-        },
-        {
-            'id': 'returns',
-            'title': 'Returns Policy',
-            'description': 'Configure return policy settings',
-            'is_configured': False
-        },
-        {
-            'id': 'payments',
-            'title': 'Payment Settings',
-            'description': 'Set up payment methods',
-            'is_configured': False
-        },
-        {
-            'id': 'notifications',
-            'title': 'Notifications',
-            'description': 'Configure email and system notifications',
-            'is_configured': False
-        },
-        {
-            'id': 'statuses',
-            'title': 'Order Statuses',
-            'description': 'Set up order status management',
-            'is_configured': False
-        }
-    ]
+    {
+        'id': 'auctions',
+        'title': 'Ustawienia aukcji',
+        'description': 'Skonfiguruj domyślne parametry aukcji',
+        'is_configured': False
+    },
+    {
+        'id': 'delivery',
+        'title': 'Ustawienia dostawy',
+        'description': 'Skonfiguruj metody i koszty dostawy',
+        'is_configured': False
+    },
+    {
+        'id': 'returns',
+        'title': 'Polityka zwrotów',
+        'description': 'Skonfiguruj ustawienia polityki zwrotów',
+        'is_configured': False
+    },
+    {
+        'id': 'payments',
+        'title': 'Ustawienia płatności',
+        'description': 'Skonfiguruj metody płatności',
+        'is_configured': False
+    },
+    {
+        'id': 'notifications',
+        'title': 'Powiadomienia',
+        'description': 'Skonfiguruj powiadomienia e-mail i systemowe',
+        'is_configured': False
+    },
+    {
+        'id': 'statuses',
+        'title': 'Statusy zamówień',
+        'description': 'Skonfiguruj zarządzanie statusami zamówień',
+        'is_configured': False
+    }
+]
     
     # Calculate configuration percentage
     configured_count = sum(1 for item in config_items if item['is_configured'])
@@ -200,7 +201,16 @@ def offer_create(request):
 
 
 def _prepare_offer_data(post_data):
-    return {
+    errors = []
+    if not post_data.get('name'):
+        errors.append("Nazwa produktu jest wymagana")
+    if not post_data.get('category_id'):
+        errors.append("Kategoria jest wymagana")
+    
+    if errors:
+        raise ValidationError(errors)
+
+    data = {
         "name": post_data['name'],
         "category": {
             "id": post_data['category_id']
@@ -213,7 +223,7 @@ def _prepare_offer_data(post_data):
             }
         }],
         "sellingMode": {
-            "format": post_data['selling_format'],
+            "format": post_data['format'],
             "price": {
                 "amount": post_data['price'],
                 "currency": "PLN"
@@ -228,8 +238,28 @@ def _prepare_offer_data(post_data):
             "countryCode": "PL",
             "postCode": post_data['post_code'],
             "province": post_data['province']
+        },
+        "delivery": {
+            "handlingTime": post_data['handling_time'],
+            "shippingRates": {"id": post_data['shipping_rates_id']}
+        },
+        "afterSalesServices": {
+            "impliedWarranty": {"id": post_data['warranty']},
+            "returnPolicy": {"id": post_data['return_policy']}
         }
     }
+    
+    if post_data.get('description'):
+        data["description"] = {
+            "sections": [{
+                "items": [{
+                    "type": "TEXT",
+                    "content": post_data['description']
+                }]
+            }]
+        }
+    
+    return data
 
 def _process_parameters(post_data):
     parameters = []
@@ -271,3 +301,10 @@ def categories_view(request):
     return render(request, 'dashboard/integrations/categories_and_parameters.html', {
         'categories': categories.get('categories', [])
     })
+    
+@login_required
+def get_matching_categories(request):
+   service = AllegroOfferService(request.user)
+   name = request.GET.get('name')
+   categories = service.get_matching_categories(name)
+   return JsonResponse(categories)
