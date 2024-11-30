@@ -1,0 +1,138 @@
+{% extends "dashboard/home.html" %}
+
+
+
+
+{% block dashboard_content %}
+
+
+
+<div class="container-fluid">
+
+   <div class="card">
+       <div class="card-header d-flex justify-content-between align-items-center">
+           <h5 class="mb-0">Przeglądarka kategorii</h5>
+           <div class="input-group w-auto">
+               <input type="text" class="form-control" id="categorySearch" placeholder="Szukaj...">
+               <button class="btn btn-outline-light" type="button" id="searchBtn">Szukaj</button>
+           </div>
+       </div>
+
+       <div class="card-body">
+           <div class="row">
+               <div class="col-md-4 border-end">
+                   <div id="categoryTree" class="overflow-auto" style="max-height: 600px;">
+                       <ul class="list-group list-group-flush">
+                           {% for category in categories %}
+                           <li class="list-group-item">
+                               <div class="d-flex align-items-center">
+                                   <button class="btn btn-sm btn-link p-0 me-2 expand-category" data-id="{{ category.id }}">
+                                       <i class="fas fa-chevron-right"></i>
+                                   </button>
+                                   <a href="#" class="category-link" data-id="{{ category.id }}">{{ category.name }}</a>
+                               </div>
+                               <div class="subcategories ms-4 collapse" id="subcategories-{{ category.id }}">
+                                   <ul class="list-group list-group-flush"></ul>
+                               </div>
+                           </li>
+                           {% endfor %}
+                       </ul>
+                   </div>
+               </div>
+
+               <div class="col-md-8">
+                   <div id="categoryDetails">
+                       <div class="text-center text-muted">
+                           <p>Wybierz kategorie do podglądu</p>
+                       </div>
+                   </div>
+               </div>
+           </div>
+       </div>
+   </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+   document.querySelectorAll('.expand-category').forEach(btn => {
+       btn.addEventListener('click', async function() {
+           const categoryId = this.dataset.id;
+           const icon = this.querySelector('i');
+           const subcategoriesDiv = document.querySelector(`#subcategories-${categoryId}`);
+           const subcategoriesList = subcategoriesDiv.querySelector('ul');
+           
+           if (icon.classList.contains('fa-chevron-right')) {
+               icon.classList.replace('fa-chevron-right', 'fa-chevron-down');
+               
+               if (subcategoriesList.children.length === 0) {
+                   const response = await fetch(`/api/allegro/categories/${categoryId}/`);
+                   const data = await response.json();
+                   
+                   subcategoriesList.innerHTML = data.categories.map(cat => `
+                       <li class="list-group-item">
+                           <div class="d-flex align-items-center">
+                               <button class="btn btn-sm btn-link p-0 me-2 expand-category" data-id="${cat.id}">
+                                   <i class="fas fa-chevron-right"></i>
+                               </button>
+                               <a href="#" class="category-link" data-id="${cat.id}">${cat.name}</a>
+                           </div>
+                           <div class="subcategories ms-4 collapse" id="subcategories-${cat.id}">
+                               <ul class="list-group list-group-flush"></ul>
+                           </div>
+                       </li>
+                   `).join('');
+                   
+                   // Re-attach event listeners for new elements
+                   subcategoriesList.querySelectorAll('.expand-category').forEach(btn => {
+                       btn.addEventListener('click', arguments.callee);
+                   });
+                   
+                   subcategoriesList.querySelectorAll('.category-link').forEach(link => {
+                       link.addEventListener('click', loadCategoryDetails);
+                   });
+               }
+           } else {
+               icon.classList.replace('fa-chevron-down', 'fa-chevron-right');
+           }
+           
+           $(subcategoriesDiv).collapse('toggle');
+       });
+   });
+
+   async function loadCategoryDetails(e) {
+       e.preventDefault();
+       const categoryId = this.dataset.id;
+       const response = await fetch(`/api/allegro/categories/${categoryId}/parameters`);
+       const data = await response.json();
+       
+       document.querySelector('#categoryDetails').innerHTML = `
+           <h6 class="border-bottom pb-2">Paramatry dla ${this.textContent}</h6>
+           <div class="table-responsive">
+               <table class="table">
+                   <thead>
+                       <tr>
+                           <th>Nazwa</th>
+                           <th>Typ</th>
+                           <th>Wymagane</th>
+                       </tr>
+                   </thead>
+                   <tbody>
+                       ${data.parameters.map(param => `
+                           <tr>
+                               <td>${param.name}</td>
+                               <td>${param.type || '-'}</td>
+                               <td>${param.required ? '<span class="badge bg-danger">Wymagany</span>' : ''}</td>
+                           </tr>
+                       `).join('')}
+                   </tbody>
+               </table>
+           </div>
+       `;
+   }
+
+   document.querySelectorAll('.category-link').forEach(link => {
+       link.addEventListener('click', loadCategoryDetails);
+   });
+});
+</script>
+{% endblock %}

@@ -253,3 +253,21 @@ def get_category_parameters(request, category_id):
     service = AllegroOfferService(request.user)
     parameters = service.get_category_parameters(category_id)
     return JsonResponse(parameters)
+
+@login_required
+def categories_view(request):
+    service = AllegroOfferService(request.user)
+    categories = service.get_categories()
+    
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        if category_id := request.GET.get('category_id'):
+            category = service.get_category(category_id)
+            parameters = service.get_category_parameters(category_id)
+            return JsonResponse({
+                'category': category,
+                'parameters': parameters.get('parameters', [])
+            })
+    
+    return render(request, 'dashboard/integrations/categories_and_parameters.html', {
+        'categories': categories.get('categories', [])
+    })

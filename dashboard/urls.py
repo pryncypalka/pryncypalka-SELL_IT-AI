@@ -26,7 +26,8 @@ urlpatterns = [
     path('api/allegro/categories/', views_allegro.get_categories, name='allegro_categories'),
     path('api/allegro/categories/<str:parent_id>/', views_allegro.get_categories, name='allegro_subcategories'),
     path('api/allegro/categories/<str:category_id>/parameters/', views_allegro.get_category_parameters, name='allegro_category_parameters'),
-
+    
+    path('allegro/categories/', views_allegro.categories_view, name='allegro_categories'),
 
 
 ]

@@ -84,3 +84,11 @@ class AllegroOfferService:
             headers=self._get_headers()
         )
         return response.json()
+    
+    def get_category(self, category_id):
+        response = requests.get(
+            f"{self.base_url}/sale/categories/{category_id}",
+            headers=self._get_headers()
+        )
+        response.raise_for_status()
+        return response.json()
