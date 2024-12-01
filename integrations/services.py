@@ -205,7 +205,7 @@ class AllegroOfferService:
 
     def get_category_parameters(self, category_id):
         response = requests.get(
-            f"{self.base_url}/sale/categories/{category_id}/parameters",
+            f"{self.base_url}/sale/categories/{category_id}/product-parameters",
             headers=self._get_headers()
         )
         return response.json()
@@ -283,7 +283,7 @@ class AllegroOfferService:
         if mode:
             params['mode'] = mode
         if category_id:
-            params['category.id'] = category_id
+            params['category_id'] = category_id
         if filters:
             params.update(filters)
             
@@ -311,7 +311,7 @@ class AllegroOfferService:
             'includeDrafts': include_drafts
         }
         if category_id:
-            params['category.id'] = category_id
+            params['category_id'] = category_id
             
         response = requests.get(
             f"{self.base_url}/sale/products/{product_id}",
@@ -462,7 +462,7 @@ class AllegroOfferService:
         Returns:
             dict: Tax settings including rates, subjects, exemptions
         """
-        params = {'category.id': category_id}
+        params = {'category_id': category_id}
         if country_codes:
             params['countryCode'] = country_codes
             
