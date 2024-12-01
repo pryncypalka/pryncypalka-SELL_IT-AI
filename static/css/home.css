@@ -26,3 +26,11 @@
     letter-spacing: 0.5px;
     padding: 1.5rem 1.5rem 0.5rem;
 }
+
+.ck-editor__editable {
+    background-color: #ffffff !important; /* Jasne tło */
+    color: #000000 !important; /* Ciemny tekst */
+    border: 1px solid #ced4da; /* Standardowa ramka */
+    padding: 1rem; /* Dodatkowy padding */
+    border-radius: 0.25rem; /* Dopasowanie do Bootstrap */
+}
