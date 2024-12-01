@@ -21,7 +21,7 @@ urlpatterns = [
     path('allegro/offers/create/', views_allegro.offer_create, name='allegro_offer_create'),
     path('allegro/offers/<str:offer_id>/', views_allegro.offer_detail, name='allegro_offer_detail'),
     
-    path('allegro/categories/', views_allegro.categories_view, name='allegro_categories'),
+    path('allegro/categories/', views_allegro.categories_view, name='allegro_categories_view'),
   
   
   
