@@ -515,5 +515,127 @@ class AllegroOfferService:
         response.raise_for_status()
         return response.json()
     
+    def get_order_events(self, from_id=None, event_types=None, limit=100):
+        """
+        Gets order events (purchases, checkouts, payments etc).
+        
+        Args:
+            from_id (str): Event ID to get subsequent events from
+            event_types (list): Filter events by type (BOUGHT, FILLED_IN etc)
+            limit (int): Max events to return (1-1000)
+        
+        Returns:
+            dict: Order events data
+        """
+        params = {'limit': limit}
+        if from_id:
+            params['from'] = from_id
+        if event_types:
+            params['type'] = event_types
+            
+        response = requests.get(
+            f"{self.base_url}/order/events",
+            headers=self._get_headers(),
+            params=params
+        )
+        response.raise_for_status()
+        return response.json()
+
+    def get_order_details(self, order_id: str) -> dict:
+        """
+        Gets detailed information about an order.
+        
+        Args:
+            order_id (str): UUID of the order/checkout form
+            
+        Returns:
+            dict: Complete order details including:
+                - Buyer info
+                - Payment details  
+                - Delivery info
+                - Line items
+                - Invoice requirements
+                - Summary and status
+        """
+        response = requests.get(
+            f"{self.base_url}/order/checkout-forms/{order_id}",
+            headers=self._get_headers()
+        )
+        response.raise_for_status()
+        return response.json()
+            
+    def get_return_policies(self, limit=60, offset=0) -> dict:
+        """
+        Gets seller's return policies.
+        
+        Args:
+            limit (int): Results per page (1-60)
+            offset (int): Page offset (0-59)
+        Returns:
+            dict: List of return policies with IDs and names
+        """
+        params = {'limit': limit, 'offset': offset}
+        response = requests.get(
+            f"{self.base_url}/after-sales-service-conditions/return-policies",
+            headers=self._get_headers(),
+            params=params
+        )
+        response.raise_for_status()
+        return response.json()
+
+    def get_implied_warranties(self, limit=60, offset=0) -> dict:
+        """
+        Gets seller's implied warranties.
+        
+        Args:
+            limit (int): Results per page (1-60)
+            offset (int): Page offset (0-59) 
+        Returns:
+            dict: List of warranties with IDs and names
+        """
+        params = {'limit': limit, 'offset': offset}
+        response = requests.get(
+            f"{self.base_url}/after-sales-service-conditions/implied-warranties", 
+            headers=self._get_headers(),
+            params=params
+        )
+        response.raise_for_status()
+        return response.json()
+
+    def get_shipping_rates(self, marketplace=None) -> dict:
+        """
+        Gets seller's shipping rates.
+        
+        Args:
+            marketplace (str): Filter by marketplace (e.g. 'allegro-cz')
+        Returns:
+            dict: List of shipping rates with IDs, names and marketplaces
+        """
+        params = {}
+        if marketplace:
+            params['marketplace'] = marketplace
+            
+        response = requests.get(
+            f"{self.base_url}/sale/shipping-rates",
+            headers=self._get_headers(),
+            params=params 
+        )
+        response.raise_for_status()
+        return response.json()
     
     
+    def get_sender_details(self, shipment_id: str) -> dict:
+        """
+        Gets shipment details including sender address.
+        """
+        response = requests.get(
+            f"{self.base_url}/shipment-management/shipments/{shipment_id}",
+            headers=self._get_headers()
+        )
+        response.raise_for_status()
+        data = response.json()
+        print(data)
+        return data.get('sender', {})
+
+        
+            
