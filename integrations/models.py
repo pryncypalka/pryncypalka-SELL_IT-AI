@@ -143,11 +143,6 @@ class AllegroOffer(models.Model):
     publication_started_at = models.DateTimeField(null=True, blank=True)
     publication_ending_at = models.DateTimeField(null=True, blank=True)
     
-    # Location
-    location_city = models.CharField(max_length=255)
-    location_country_code = models.CharField(max_length=2, default='PL')
-    location_post_code = models.CharField(max_length=10)
-    location_province = models.CharField(max_length=255)
     
     # Additional data
     language = models.CharField(max_length=5, default='pl-PL')
@@ -165,3 +160,26 @@ class AllegroOffer(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+        
+class AllegroDefaultSettings(models.Model):
+   user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+   
+   # Shipping
+   shipping_rates = models.CharField(max_length=255)  
+   handling_time = models.CharField(max_length=20, default='PT24H')
+   
+   # Payment & Returns
+   payment_method = models.CharField(max_length=50)
+   return_policy = models.CharField(max_length=255)  
+   warranty_policy = models.CharField(max_length=255)  
+   implied_warranty = models.CharField(max_length=255) 
+   
+   # Defaults
+   default_category = models.CharField(max_length=255, null=True, blank=True)
+   
+   created_at = models.DateTimeField(auto_now_add=True)
+   updated_at = models.DateTimeField(auto_now=True)
+   
+   class Meta:
+       verbose_name = "Allegro Default Settings"
+       verbose_name_plural = "Allegro Default Settings"
