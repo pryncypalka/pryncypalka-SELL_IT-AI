@@ -1,66 +1,80 @@
 {% extends "dashboard/home.html" %}
 {% block dashboard_content %}
-
 <div class="container-fluid">
-    <!-- Status połączenia -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="mb-0">Status konfiguracji Allegro</h5>
-                <button class="btn btn-primary btn-sm">Zresetuj konfigurację</button>
-            </div>
-            
-            <div class="progress mb-2" style="height: 10px;">
-                <div class="progress-bar bg-primary" role="progressbar" style="width: {{ config_percentage }}%;" 
-                     aria-valuenow="{{ config_percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
-            </div>
-            <small>Postęp konfiguracji: {{ config_percentage }}%</small>
-        </div>
-    </div>
+ <form method="post" class="needs-validation" novalidate>
+   {% csrf_token %}
+   
+   
+   <!-- Shipping Settings -->
+   <div class="card mb-4">
+     <div class="card-header">
+       <h5 class="mb-0">Ustawienia wysyłki</h5>
+     </div>
+     <div class="card-body">
+       <div class="row">
+         <div class="col-md-6">
+           <div class="mb-3">
+             <label class="form-label">Cennik wysyłek</label>
+             <select name="shipping_rates" class="form-select" required>
+            {% for rate in shipping_rates %}
+                <option value="{{ rate.id }}" 
+                {% if settings.shipping_rates == rate.id %}selected{% endif %}>
+                {{ rate.name }}
+                </option>
+            {% endfor %}
+            </select>
+           </div>
+         </div>
+         <div class="col-md-6">
+           <div class="mb-3">
+             <label class="form-label">Wysyłka w ciągu</label>
+             <select name="handling_time" class="form-select" required>
+               <option value="PT24H">24 godziny</option>
+               <option value="P2D">2 dni</option>
+               <option value="P3D">3 dni</option>
+             </select>
+           </div>
+         </div>
+       </div>
+     </div>
+   </div>
 
-    <!-- Karty konfiguracji -->
-    <div class="row g-4">
-        {% for config in config_items %}
-        <div class="col-md-4">
-            <div class="card h-100" data-bs-toggle="modal" data-bs-target="#configModal{{ config.id }}" style="cursor: pointer">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="card-subtitle mb-2 text-muted">{{ config.title }}</h6>
-                            <p class="card-text small">{{ config.description }}</p>
-                        </div>
-                        {% if config.is_configured %}
-                            <i class="fas fa-check-circle text-success fs-4"></i>
-                        {% else %}
-                            <i class="fas fa-times-circle text-danger fs-4"></i>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
+   <!-- Return & Warranty Settings -->
+   <div class="card mb-4"> 
+     <div class="card-header">
+       <h5 class="mb-0">Ustawienia zwrotów i gwarancji</h5>
+     </div>
+     <div class="card-body">
+       <div class="row">
+         <div class="col-md-6">
+           <div class="mb-3">
+             <label class="form-label">Polityka zwrotów</label>
+             <select name="return_policy" class="form-select" required>
+               {% for policy in return_policies %}
+                 <option value="{{ policy.id }}">{{ policy.name }}</option>
+               {% endfor %}
+             </select>
+           </div>
+         </div>
+         <div class="col-md-6">
+           <div class="mb-3">
+             <label class="form-label">Gwarancja</label>
+             <select name="warranty_policy" class="form-select" required>
+               {% for warranty in warranties %}
+                 <option value="{{ warranty.id }}">{{ warranty.name }}</option>
+               {% endfor %}
+             </select>
+           </div>
+         </div>
+       </div>
+     </div>
+   </div>
 
-        <!-- Modal dla każdego elementu konfiguracji -->
-        <div class="modal fade" id="configModal{{ config.id }}" tabindex="-1">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">{{ config.title }}</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        {% comment %} <form method="post" action="{% url 'dashboard:allegro_config_update' config.id %}">
-                            {% csrf_token %}
-                            <!-- Pola formularza zostaną tutaj dodane -->
-                            <div class="text-end">
-                                <button type="submit" class="btn btn-primary">Zapisz zmiany</button>
-                            </div>
-                        </form> {% endcomment %}
-                    </div>
-                </div>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
+   
+
+   <div class="d-flex justify-content-end mb-4">
+     <button type="submit" class="btn btn-primary">Zapisz ustawienia</button>
+   </div>
+ </form>
 </div>
-
 {% endblock %}

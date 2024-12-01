@@ -1,14 +1,18 @@
+import json
 from django.forms import ValidationError
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.contrib import messages
+import requests
 from integrations.models import *
 from django.utils import timezone
 from integrations.services import AllegroOfferService
 from datetime import datetime
 from django.utils.dateparse import parse_datetime
+from bleach import clean
+
 
 @login_required
 def allegro_integration(request):
@@ -80,55 +84,40 @@ def allegro_disconnect(request):
     messages.info(request, "To completely disconnect from Allegro, please visit Allegro's Connected Applications page in your Allegro account settings and remove access for this application.")
     return redirect('dashboard:allegro_integration')
 
-@login_required
+@login_required 
 def allegro_configuration(request):
-    config_items = [
-    {
-        'id': 'auctions',
-        'title': 'Ustawienia aukcji',
-        'description': 'Skonfiguruj domyślne parametry aukcji',
-        'is_configured': False
-    },
-    {
-        'id': 'delivery',
-        'title': 'Ustawienia dostawy',
-        'description': 'Skonfiguruj metody i koszty dostawy',
-        'is_configured': False
-    },
-    {
-        'id': 'returns',
-        'title': 'Polityka zwrotów',
-        'description': 'Skonfiguruj ustawienia polityki zwrotów',
-        'is_configured': False
-    },
-    {
-        'id': 'payments',
-        'title': 'Ustawienia płatności',
-        'description': 'Skonfiguruj metody płatności',
-        'is_configured': False
-    },
-    {
-        'id': 'notifications',
-        'title': 'Powiadomienia',
-        'description': 'Skonfiguruj powiadomienia e-mail i systemowe',
-        'is_configured': False
-    },
-    {
-        'id': 'statuses',
-        'title': 'Statusy zamówień',
-        'description': 'Skonfiguruj zarządzanie statusami zamówień',
-        'is_configured': False
-    }
-]
-    
-    # Calculate configuration percentage
-    configured_count = sum(1 for item in config_items if item['is_configured'])
-    config_percentage = int((configured_count / len(config_items)) * 100)
+   service = AllegroOfferService(request.user)
+   
+   try:
+       shipping_rates = service.get_shipping_rates()
+       return_policies = service.get_return_policies() 
+       warranties = service.get_implied_warranties()
+       
+       settings = AllegroDefaultSettings.objects.get_or_create(
+           user=request.user
+       )[0]
 
-    return render(request, 'dashboard/integrations/allegro_configuration.html', {
-        'config_items': config_items,
-        'config_percentage': config_percentage
-    })
+       if request.method == "POST":
+           settings.shipping_rates = request.POST.get('shipping_rates')
+           settings.handling_time = request.POST.get('handling_time')
+           settings.return_policy = request.POST.get('return_policy')
+           settings.warranty_policy = request.POST.get('warranty_policy')
+           settings.implied_warranty = request.POST.get('implied_warranty')
+           settings.save()
+           
+           messages.success(request, "Zaktualizowano ustawienia Allegro")
+           return redirect('dashboard:allegro_configuration')
+
+       return render(request, 'dashboard/integrations/allegro_configuration.html', {
+           'shipping_rates': shipping_rates.get('shippingRates', []),
+           'return_policies': return_policies.get('returnPolicies', []),
+           'warranties': warranties.get('impliedWarranties', []),
+           'settings': settings
+       })
+
+   except Exception as e:
+       messages.error(request, f"Błąd: {str(e)}")
+       return redirect('dashboard:allegro_integration')
     
 @login_required 
 def offer_detail(request, offer_id):
@@ -175,57 +164,200 @@ def offers_list(request):
     })
     
     
-@login_required 
+@login_required
 def offer_create(request):
-   try:
-       service = AllegroOfferService(request.user)
-       if request.method == 'POST':
-           offer_data = _prepare_offer_data(request.POST)
-           response = service.create_offer(offer_data)
-           
-           if response.get('id'):
-               # Save to DB...
-               messages.success(request, "Offer created successfully")
-               return redirect('dashboard:allegro_offers')
-               
-       root_categories = service.get_categories()
-       return render(request, 'dashboard/integrations/offer_create.html', {
-           'categories': root_categories.get('categories', [])
-       })
-       
-   except Exception as e:
-       messages.error(request, f"Error: {str(e)}")
-       return redirect('dashboard:allegro_offers')
+    try:
+        service = AllegroOfferService(request.user)
+        # 1. Sprawdzanie czy mamy wybrany produkt z parametru URL
+        product_id = request.GET.get('product_id')
+        
+        if product_id:
+            # 2. Gdy mamy wybrany produkt z Allegro
+            try:
+                # Pobierz szczegóły produktu z API Allegro
+                product_details = service.get_product_details(product_id)
+                print("Product Details:", product_details)
+                
+                # Przygotuj dane początkowe do formularza
+                initial_data = {
+                    'name': product_details.get('name'),
+                    'category_id': product_details.get('category', {}).get('id'),
+                    'parameters': product_details.get('parameters', []),
+                    'images': [img.get('url') for img in product_details.get('images', [])],
+                    'description': product_details.get('description'),
+                }
+            except Exception as e:
+                messages.error(request, f"Błąd podczas pobierania danych produktu: {str(e)}")
+                return redirect('dashboard:product_search')
+        else:
+            # 3. Gdy tworzymy nowy produkt
+            initial_data = {}
 
+        # 4. Pobierz potrzebne dane do formularza
+        shipping_rates = service.get_shipping_rates()
+        warranties = service.get_implied_warranties()
+        return_policies = service.get_return_policies()
 
+        # 5. Obsługa wysyłania formularza
+        if request.method == 'POST':
+            try:
+                if product_id:
+                    # Tworzenie oferty z istniejącego produktu
+                    offer_data = _prepare_offer_data_with_product(request, product_id)
+                else:
+                    # Tworzenie oferty z nowym produktem
+                    offer_data = _prepare_offer_data(request)
+                    
+                # Wyślij ofertę do Allegro
+                response = service.create_offer(offer_data)
 
+                # 6. Zwróć odpowiedź
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    # Dla żądań AJAX
+                    return JsonResponse({
+                        'success': True,
+                        'message': 'Pomyślnie utworzono ofertę'
+                    })
+                # Dla normalnych żądań
+                messages.success(request, "Pomyślnie utworzono ofertę")
+                return redirect('dashboard:allegro_offers')
+                
+            except requests.exceptions.HTTPError as e:
+                # 7. Obsługa błędów
+                error_response = e.response.json()
+                error_message = error_response.get('errors', [{}])[0].get('userMessage', 'Unknown error')
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({
+                        'success': False,
+                        'message': f'Błąd Allegro: {error_message}'
+                    }, status=400)
+                messages.error(request, f"Błąd Allegro: {error_message}")
 
-def _prepare_offer_data(post_data):
-    errors = []
-    if not post_data.get('name'):
-        errors.append("Nazwa produktu jest wymagana")
-    if not post_data.get('category_id'):
-        errors.append("Kategoria jest wymagana")
+        # 8. Wyrenderuj formularz
+        return render(request, 'dashboard/integrations/offer_create.html', {
+            'shipping_rates': shipping_rates.get('shippingRates', []),
+            'warranties': warranties.get('impliedWarranties', []),
+            'return_policies': return_policies.get('returnPolicies', []),
+            'settings': AllegroDefaultSettings.objects.get_or_create(user=request.user)[0],
+            'initial_data': initial_data,  # Dane początkowe do formularza
+            'product_id': product_id  # ID produktu jeśli istnieje
+        })
+
+    except Exception as e:
+        messages.error(request, f"Błąd: {str(e)}")
+        return redirect('dashboard:allegro_offers')
+
+def _prepare_offer_data_with_product(request, product_id):
+    """Przygotowuje dane oferty dla istniejącego produktu"""
+    post_data = request.POST
     
-    if errors:
-        raise ValidationError(errors)
-
+    # 1. Pobierz ustawienia użytkownika
+    try:
+        settings = AllegroDefaultSettings.objects.get(user=request.user)
+    except AllegroDefaultSettings.DoesNotExist:
+        settings = None
+    
+    # 2. Przygotuj podstawową strukturę danych oferty
     data = {
+        "productSet": [{
+            "product": {
+                "id": product_id  # Tylko ID produktu jest potrzebne
+            },
+            "quantity": {
+                "value": 1
+            }
+        }],
+        # 3. Dane sprzedażowe
+        "sellingMode": {
+            "format": post_data.get('format', 'BUY_NOW'),
+            "price": {
+                "amount": str(post_data['price']),
+                "currency": "PLN"
+            }
+        },
+        # 4. Stan magazynowy
+        "stock": {
+            "available": int(post_data['quantity']),
+            "unit": "UNIT"
+        },
+        # 5. Ustawienia publikacji
+        "publication": {
+            "duration": post_data.get('duration', 'P30D'),
+            "status": "INACTIVE"
+        },
+        # 6. Ustawienia dostawy
+        "delivery": {
+            "handlingTime": settings.handling_time if settings else "PT24H",
+            "shippingRates": {"id": settings.shipping_rates if settings else None}
+        },
+        # 7. Dodatkowe ustawienia
+        "language": "pl-PL",
+        "payments": {
+            "invoice": "VAT"
+        },
+        "location": {
+            "countryCode": "PL"
+        },
+        # 8. Usługi posprzedażowe
+        "afterSalesServices": {
+            "impliedWarranty": {
+                "id": settings.implied_warranty if settings else None
+            },
+            "returnPolicy": {
+                "id": settings.return_policy if settings else None
+            },
+            "warranty": {
+                "id": settings.warranty_policy if settings else None
+            }
+        }
+    }
+    
+    print("Final Offer Data with Product:", data)
+    return data
+
+def _prepare_offer_data(request):
+    post_data = request.POST
+    print(f"POST Data: {post_data}")
+    
+    try:
+        settings = AllegroDefaultSettings.objects.get(user=request.user)
+    except AllegroDefaultSettings.DoesNotExist:
+        settings = None
+
+    image_urls = post_data.getlist('images[]')
+    description_html = post_data.get('description', '')
+    
+    data = {
+        "productSet": [{
+            "product": {
+                "name": post_data['name'],
+                "category": {
+                    "id": post_data['category_id']
+                },
+                "parameters": _process_parameters(post_data),
+                "images": image_urls, 
+            },
+            "quantity": {
+                "value": 1
+            }
+        }],
         "name": post_data['name'],
         "category": {
             "id": post_data['category_id']
         },
-        "productSet": [{
-            "product": {
-                "name": post_data['name'],
-                "category": {"id": post_data['category_id']},
-                "parameters": _process_parameters(post_data)
-            }
-        }],
+        "parameters": [], 
+        "description": {
+            "sections": [{
+                "items": [{
+                    "type": "TEXT",
+                    "content": description_html
+                }]
+            }]
+        },
         "sellingMode": {
-            "format": post_data['format'],
+            "format": post_data.get('format', 'BUY_NOW'),
             "price": {
-                "amount": post_data['price'],
+                "amount": str(post_data['price']),
                 "currency": "PLN"
             }
         },
@@ -233,32 +365,36 @@ def _prepare_offer_data(post_data):
             "available": int(post_data['quantity']),
             "unit": "UNIT"
         },
-        "location": {
-            "city": post_data['city'],
-            "countryCode": "PL",
-            "postCode": post_data['post_code'],
-            "province": post_data['province']
+        "publication": {
+            "duration": post_data.get('duration', 'P30D'),
+            "status": "INACTIVE"
         },
         "delivery": {
-            "handlingTime": post_data['handling_time'],
-            "shippingRates": {"id": post_data['shipping_rates_id']}
+            "handlingTime": settings.handling_time if settings else "PT24H",
+            "shippingRates": {"id": settings.shipping_rates if settings else None}
         },
+        "language": "pl-PL",
+        "payments": {
+            "invoice": "VAT"
+        },
+        "location": {
+            "countryCode": "PL"
+        },
+        "images": image_urls,
         "afterSalesServices": {
-            "impliedWarranty": {"id": post_data['warranty']},
-            "returnPolicy": {"id": post_data['return_policy']}
+            "impliedWarranty": {
+                "id": settings.implied_warranty if settings else None
+            },
+            "returnPolicy": {
+                "id": settings.return_policy if settings else None
+            },
+            "warranty": {
+                "id": settings.warranty_policy if settings else None
+            }
         }
     }
     
-    if post_data.get('description'):
-        data["description"] = {
-            "sections": [{
-                "items": [{
-                    "type": "TEXT",
-                    "content": post_data['description']
-                }]
-            }]
-        }
-    
+    print(f"Final Offer Data: {data}")
     return data
 
 def _process_parameters(post_data):
@@ -266,10 +402,13 @@ def _process_parameters(post_data):
     for key, value in post_data.items():
         if key.startswith('param_'):
             param_id = key.replace('param_', '')
-            parameters.append({
-                "id": param_id,
-                "values": [value]
-            })
+            print(f"Processing Parameter ID: {param_id} with Value: {value}")
+            if param_id != '11323':  # Exclude parameter 'Stan' if necessary
+                parameters.append({
+                    "id": param_id,
+                    "values": [value]
+                })
+    print(f"Processed Parameters: {parameters}")
     return parameters
 
 @login_required
@@ -308,3 +447,114 @@ def get_matching_categories(request):
    name = request.GET.get('name')
    categories = service.get_matching_categories(name)
    return JsonResponse(categories)
+
+@login_required
+def upload_offer_image(request):
+    if request.method != 'POST' or 'image' not in request.FILES:
+        return JsonResponse({'error': 'No image provided'}, status=400)
+        
+    try:
+        service = AllegroOfferService(request.user)
+        image_file = request.FILES['image']
+        
+        # Upload image to Allegro
+        result = service.upload_image(image_data=image_file.read())
+        
+        return JsonResponse({
+            'success': True,
+            'url': result['location']
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'error': str(e)
+        }, status=400)
+        
+        
+@login_required
+def product_search(request):
+    """Strona wyszukiwania produktów"""
+    return render(request, 'dashboard/integrations/product_search.html')
+
+@login_required
+def search_products_api(request):
+    """API endpoint do wyszukiwania produktów"""
+    service = AllegroOfferService(request.user)
+    try:
+        phrase = request.GET.get('phrase')
+        mode = request.GET.get('mode')
+        language = request.GET.get('language', 'pl-PL')
+        category_id = request.GET.get('category_id')
+        
+        # Dodatkowe parametry do filtrowania
+        params = {
+            'phrase': phrase,
+            'mode': mode,
+            'language': language,
+            'category_id': category_id,
+        }
+        
+        # Dodaj dynamiczne filtry z parametrów GET
+        for key, value in request.GET.items():
+            if key not in ['phrase', 'mode', 'language', 'categoryId']:
+                params[key] = value
+        
+        products = service.search_products(**params)
+        
+        # Przygotuj produkty do wyświetlenia
+        formatted_products = []
+        for product in products.get('products', []):
+            formatted_product = {
+                'id': product.get('id'),
+                'name': product.get('name'),
+                'ean': None,
+                'category': {
+                    'id': product.get('category', {}).get('id'),
+                    'name': product.get('category', {}).get('name'),
+                    'path': product.get('category', {}).get('path', [])
+                },
+                'images': [img.get('url') for img in product.get('images', [])],
+                'parameters': product.get('parameters', []),
+                'description': product.get('description'),
+                'producer': None
+            }
+            
+            # Znajdź EAN i producenta w parametrach
+            for param in product.get('parameters', []):
+                if param.get('options', {}).get('isGTIN'):
+                    formatted_product['ean'] = param.get('values', [None])[0]
+                if param.get('name') == 'Producent':
+                    formatted_product['producer'] = param.get('values', [None])[0]
+            
+            formatted_products.append(formatted_product)
+        
+        return JsonResponse({
+            'products': formatted_products,
+            'filters': products.get('filters', []),
+            'categories': products.get('categories', {})
+        })
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
+@login_required
+def select_product_api(request):
+    """API endpoint do wyboru produktu"""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Invalid method'}, status=405)
+        
+    service = AllegroOfferService(request.user)
+    try:
+        data = json.loads(request.body)
+        product_id = data.get('productId')
+        
+        if not product_id:
+            return JsonResponse({'error': 'Product ID required'}, status=400)
+            
+        product_details = service.get_product_details(product_id)
+        
+        # Zapisz wybrane ID produktu w sesji
+        request.session['selected_product_id'] = product_id
+        
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)

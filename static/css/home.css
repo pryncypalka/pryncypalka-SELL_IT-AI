@@ -34,3 +34,10 @@
     padding: 1rem;
     border-radius: 0.25rem;
 }
+
+.upload-overlay {
+    transition: opacity 0.3s;
+}
+.card:hover .btn-danger {
+    opacity: 1;
+}

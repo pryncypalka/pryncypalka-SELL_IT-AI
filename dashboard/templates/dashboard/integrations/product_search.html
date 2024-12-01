@@ -1,0 +1,89 @@
+{% extends "dashboard/home.html" %}
+{% load static %}
+
+{% block dashboard_content %}
+<div class="container-fluid">
+    <!-- Główna sekcja wyszukiwania -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Wybierz produkt do sprzedaży</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <!-- Wyszukiwanie po EAN -->
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title">Wyszukaj po kodzie EAN</h6>
+                            <div class="input-group">
+                                <input type="text" id="eanSearch" class="form-control" 
+                                       placeholder="Podaj kod EAN/ISBN">
+                                <button class="btn btn-primary" id="searchEanBtn">
+                                    Szukaj
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Wyszukiwanie po nazwie -->
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title">Wyszukaj po nazwie produktu</h6>
+                            <div class="input-group">
+                                <input type="text" id="phraseSearch" class="form-control" 
+                                       placeholder="Wpisz nazwę produktu">
+                                <button class="btn btn-primary" id="searchPhraseBtn">
+                                    Szukaj
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wyniki wyszukiwania -->
+            <div id="searchResults" class="mt-4">
+                <div id="productsList" class="row g-4">
+                    <!-- Tu będą wyniki wyszukiwania -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Przycisk do tworzenia nowego produktu -->
+    <div class="card">
+        <div class="card-body">
+            <h6>Nie znalazłeś swojego produktu?</h6>
+            <a href="{% url 'dashboard:allegro_offer_create' %}" class="btn btn-secondary">
+                Stwórz nowy produkt
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Template dla karty produktu -->
+<template id="productCardTemplate">
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h6 class="product-name mb-2"></h6>
+                <div class="product-details small">
+                    <p class="mb-1">EAN: <span class="product-ean"></span></p>
+                    <p class="mb-1">Kategoria: <span class="product-category"></span></p>
+                    <p class="mb-2">Producent: <span class="product-manufacturer"></span></p>
+                </div>
+                <button class="btn btn-primary btn-sm select-product w-100">
+                    Wybierz ten produkt
+                </button>
+            </div>
+        </div>
+    </div>
+</template>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/product_search.js' %}"></script>
+{% endblock %}
