@@ -1,160 +1,208 @@
 {% extends "dashboard/home.html" %}
 {% load static %}
 
+
 {% block dashboard_content %}
-<div class="container-fluid">
-    <form method="post" class="needs-validation" novalidate enctype="multipart/form-data">
-        {% csrf_token %}
-        
-        <!-- Podstawowe informacje -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0">Podstawowe informacje</h5>
+
+    {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                        <div class="alert {{ message.tags }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+    {% endif %}
+
+{{ initial_data|json_script:"initial-data" }}
+<script>
+    const initialData = JSON.parse(document.getElementById('initial-data').textContent);
+</script>
+
+<form method="post" class="container-fluid" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <input type="hidden" id="productId" value="{{ product_id|default:'' }}">
+
+    <!-- Basic Info -->
+    <div class="card mb-4">
+        <div class="card-header">Podstawowe informacje</div>
+        <div class="card-body">
+            <div class="mb-3">
+                <label>Tytuł oferty</label>
+                <input name="name" type="text" class="form-control" maxlength="75" required>
             </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="form-label">Nazwa produktu</label>
-                            <input type="text" name="name" class="form-control" required>
-                            <div id="categoryMatches" class="mt-2"></div>
+            
+            <div class="mb-3">
+                <label>Opis</label>
+                <textarea name="description" id="description" class="form-control" rows="5"></textarea>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Kategoria</label>
+                <input type="hidden" name="category_id">
+
+                <div id="categoryMatches" class="mt-2"></div>
+
+                <div id="categorySelection" class="category-selection">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Parameters -->
+    <div class="card mb-4">
+        <div class="card-header">Parametry</div>
+        <div class="card-body">
+            <div id="parametersContainer"></div>
+        </div>
+    </div>
+
+    <!-- Pricing -->
+    <div class="card mb-4">
+        <div class="card-header">Cena i sprzedaż</div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label>Cena</label>
+                        <div class="input-group">
+                            <input type="number" name="price" class="form-control" step="0.01" required>
+                            <span class="input-group-text">PLN</span>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="form-label">Kategoria</label>
-                            <input type="hidden" name="category_id">
-                            <div id="categorySelection" class="border rounded p-3"></div>
-                        </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label>Ilość</label>
+                        <input type="number" name="quantity" class="form-control" min="1" required>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label>Format sprzedaży</label>
+                        <select name="format" class="form-select" required>
+                            <option value="BUY_NOW">Kup teraz</option>
+                            <option value="AUCTION">Aukcja</option>
+                            <option value="ADVERTISEMENT">Ogłoszenie</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label>Czas trwania</label>
+                        <select name="duration" class="form-select" required>
+                            <option value="P30D">30 dni</option>
+                            <option value="P20D">20 dni</option>
+                            <option value="P10D">10 dni</option>
+                            <option value="P7D">7 dni</option>
+                        </select>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Parametry -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0">Parametry</h5>
-            </div>
-            <div class="card-body">
-                <div id="parametersContainer"></div>
-            </div>
-        </div>
-
-        <!-- Opcje sprzedaży -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0">Opcje sprzedaży</h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="mb-3">
-                            <label class="form-label">Cena</label>
-                            <div class="input-group">
-                                <input type="number" name="price" class="form-control" step="0.01" required>
-                                <span class="input-group-text">PLN</span>
-                            </div>
-                        </div>
+    <!-- Shipping -->
+    <div class="card mb-4">
+        <div class="card-header">Wysyłka i zwroty</div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label>Cennik dostaw</label>
+                        <select name="shipping_rates" class="form-select" required>
+                            {% for rate in shipping_rates %}
+                                <option value="{{ rate.id }}" {% if settings.shipping_rates == rate.id %}selected{% endif %}>
+                                    {{ rate.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
                     </div>
-                    <div class="col-md-4">
-                        <div class="mb-3">
-                            <label class="form-label">Ilość</label>
-                            <input type="number" name="quantity" class="form-control" min="1" required>
-                        </div>
+                    <div class="mb-3">
+                        <label>Czas wysyłki</label>
+                        <select name="handling_time" class="form-select" required>
+                            <option value="PT24H" {% if settings.handling_time == 'PT24H' %}selected{% endif %}>24 godziny</option>
+                            <option value="P2D" {% if settings.handling_time == 'P2D' %}selected{% endif %}>2 dni</option>
+                            <option value="P3D" {% if settings.handling_time == 'P3D' %}selected{% endif %}>3 dni</option>
+                        </select>
                     </div>
-                    <div class="col-md-4">
-                        <div class="mb-3">
-                            <label class="form-label">Format</label>
-                            <select name="format" class="form-select" required>
-                                <option value="BUY_NOW">Kup teraz</option>
-                                <option value="AUCTION">Aukcja</option>
-                                <option value="ADVERTISEMENT">Ogłoszenie</option>
-                            </select>
-                        </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label>Polityka zwrotów</label>
+                        <select name="return_policy" class="form-select" required>
+                            {% for policy in return_policies %}
+                                <option value="{{ policy.id }}" {% if settings.return_policy == policy.id %}selected{% endif %}>
+                                    {{ policy.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label>Gwarancja</label>
+                        <select name="warranty" class="form-select" required>
+                            {% for warranty in warranties %}
+                                <option value="{{ warranty.id }}" {% if settings.warranty_policy == warranty.id %}selected{% endif %}>
+                                    {{ warranty.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0">Dostawa i Gwarancja</h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <h6>Lokalizacja</h6>
-                        <div class="mb-3">
-                            <label class="form-label">Miasto</label>
-                            <input type="text" name="city" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Kod pocztowy</label>
-                            <input type="text" name="post_code" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Województwo</label>
-                            <input type="text" name="province" class="form-control" required>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <h6>Dostawa</h6>
-                        <div class="mb-3">
-                            <label class="form-label">Czas obsługi</label>
-                            <select name="handling_time" class="form-select" required>
-                                <option value="PT24H">24 godziny</option>
-                                <option value="P2D">2 dni</option>
-                                <option value="P3D">3 dni</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Cennik dostaw</label>
-                            <select name="shipping_rates_id" class="form-select" required>
-                                <!-- Wypełniane przez API -->
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="row mt-3">
-                    <div class="col-12">
-                        <h6>Gwarancja i zwroty</h6>
-                        <div class="mb-3">
-                            <label class="form-label">Polityka zwrotów</label>
-                            <select name="return_policy" class="form-select" required>
-                                <!-- Wypełniane przez API -->
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Gwarancja</label>
-                            <select name="warranty" class="form-select" required>
-                                <!-- Wypełniane przez API -->
-                            </select>
-                        </div>
-                    </div>
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Zdjęcia</h5>
+        </div>
+        <div class="card-body">
+            <div class="mb-3">
+                <input type="file" id="images" name="images" multiple accept="image/*" class="form-control">
+                <div id="imagePreview" class="row g-2 mt-2">
+                    <!-- Tu będą renderowane miniatury -->
                 </div>
             </div>
+            <!-- Lista przesłanych zdjęć jako hidden inputy -->
+            <div id="uploadedImages"></div>
         </div>
+    </div>
 
-        <!-- Zdjęcia -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0">Zdjęcia</h5>
-            </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <input type="file" id="images" multiple accept="image/*" class="form-control">
-                    <div id="imagePreview" class="row g-2 mt-2"></div>
-                </div>
-            </div>
-        </div>
+    <div class="d-flex justify-content-end gap-2 mb-4">
+        <button type="button" class="btn btn-secondary">Zapisz szkic</button>
+        <button type="submit" class="btn btn-primary">Utwórz ofertę</button>
+    </div>
+</form>
 
-        <div class="d-flex justify-content-end gap-2 mb-4">
-            <button type="button" class="btn btn-secondary">Zapisz wersję roboczą</button>
-            <button type="submit" class="btn btn-primary">Utwórz ofertę</button>
-        </div>
-    </form>
-</div>
+
+<script>
+    const {
+        ClassicEditor,
+        Essentials,
+        Bold,
+        Italic,
+        Font,
+        Paragraph
+    } = CKEDITOR;
+    
+    ClassicEditor
+        .create(document.querySelector('#description'), {
+            plugins: [Essentials, Bold, Italic, Font, Paragraph],
+            toolbar: [
+                'undo', 'redo', '|', 'bold', 'italic', '|',
+                'fontSize', 'fontFamily', 'fontColor', 'fontBackgroundColor'
+            ],
+            contentStyle: 'body { color: black; }' // Ustawia kolor tekstu na czarny
+        })
+        .catch(error => {
+            console.error(error);
+        });
+</script>
 
 {% endblock %}
 
