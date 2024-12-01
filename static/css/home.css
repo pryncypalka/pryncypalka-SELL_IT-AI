@@ -28,9 +28,9 @@
 }
 
 .ck-editor__editable {
-    background-color: #ffffff !important; /* Jasne tło */
-    color: #000000 !important; /* Ciemny tekst */
-    border: 1px solid #ced4da; /* Standardowa ramka */
-    padding: 1rem; /* Dodatkowy padding */
-    border-radius: 0.25rem; /* Dopasowanie do Bootstrap */
+    background-color: #ffffff !important; 
+    color: #000000 !important; 
+    border: 1px solid #ced4da; 
+    padding: 1rem;
+    border-radius: 0.25rem;
 }
