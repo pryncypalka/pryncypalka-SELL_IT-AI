@@ -3,6 +3,7 @@ annotated-types==0.7.0
 anyio==4.6.2.post1
 asgiref==3.8.1
 billiard==4.2.0
+bleach==6.2.0
 celery==5.4.0
 certifi==2024.8.30
 charset-normalizer==3.4.0
@@ -15,6 +16,7 @@ cron-descriptor==1.4.5
 distro==1.9.0
 Django==5.1.1
 django-celery-beat==2.7.0
+django-ckeditor-5==0.2.15
 django-debug-toolbar==4.4.6
 django-jazzmin==3.0.1
 django-rest-framework==0.1.0
@@ -46,3 +48,4 @@ tzdata==2024.1
 urllib3==2.2.3
 vine==5.1.0
 wcwidth==0.2.13
+webencodings==0.5.1
