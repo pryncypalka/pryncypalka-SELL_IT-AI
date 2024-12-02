@@ -68,18 +68,25 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // Wypełnij kategorię
-        if (initialData.category) {
-            console.log("Setting category:", initialData.category);
+        if (initialData.category_id) {
+            console.log("Setting category:", initialData.category_id);
             const categoryIdInput = document.querySelector('[name="category_id"]');
             if (categoryIdInput) {
-                categoryIdInput.value = initialData.category.id;
+                categoryIdInput.value = initialData.category_id;
             }
             
-            const selectedCategoryContainer = document.querySelector('.selected-category');
-            if (selectedCategoryContainer) {
-                selectedCategoryContainer.innerHTML = `
-                    <strong>Kategoria:</strong> ${initialData.category.name}
-                    ${!productId ? '<button type="button" class="btn btn-sm btn-link clear-category">zmień</button>' : ''}
+            const selectedCategoryInfo = document.getElementById('selectedCategoryInfo');
+            if (selectedCategoryInfo) {
+                selectedCategoryInfo.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>Wybrana kategoria:</strong> 
+                            <span class="ms-2">${initialData.category?.name || 'Elektronika - Telefony i Akcesoria - Akcesoria GSM'}</span>
+                        </div>
+                        ${!productId ? `
+                            <button type="button" class="btn btn-sm btn-link clear-category">zmień</button>
+                        ` : ''}
+                    </div>
                 `;
             }
         }
@@ -123,7 +130,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Jeśli mamy wybrany produkt, ukryj/zablokuj niektóre pola
     if (productId) {
         // Ukryj sekcję wyboru kategorii
-        document.querySelector('.category-selection')?.classList.add('d-none');
+        document.getElementById('categorySelection')?.classList.add('d-none');
+        document.getElementById('categoryMatches')?.classList.add('d-none');
         
         // Zablokuj edycję parametrów
         const inputs = parametersContainer.querySelectorAll('input, select');
@@ -360,12 +368,23 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Określenie wartości parametru
         let value = '';
+        let displayValue = '';
+    
         if (param.valuesIds && param.valuesIds.length > 0) {
-            // Dla parametrów z valuesIds
-            value = param.valuesIds[0];  // Przykład: "207786_233866"
+            value = param.valuesIds[0];
+            displayValue = param.valuesLabels ? param.valuesLabels[0] : value;
         } else if (param.values && param.values.length > 0) {
-            // Dla parametrów ze zwykłymi wartościami
-            value = param.values[0];      // Przykład: "Lito"
+            value = param.values[0];
+            displayValue = value;
+        }
+    
+        if (productId) {
+            // Jeśli to produkt z Allegro, pokazujemy tylko wartość
+            return `
+                <div class="form-control bg-light" readonly>
+                    ${displayValue}${param.unit ? ` ${param.unit}` : ''}
+                </div>
+            `;
         }
         
         // Tworzymy input w zależności od typu parametru
@@ -405,6 +424,7 @@ document.addEventListener('DOMContentLoaded', function() {
                    ${param.unit ? `data-unit="${param.unit}"` : ''}
                    ${param.required ? 'required' : ''}>`;
     }
+    
 
    
     // Message display helper
