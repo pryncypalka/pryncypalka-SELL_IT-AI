@@ -563,6 +563,17 @@ class AllegroOfferService:
         )
         response.raise_for_status()
         return response.json()
+    
+    def get_warranties(self, limit=60, offset=0) -> dict:
+        """Gets seller's warranties."""
+        params = {'limit': limit, 'offset': offset}
+        response = requests.get(
+            f"{self.base_url}/after-sales-service-conditions/warranties",
+            headers=self._get_headers(),
+            params=params
+        )
+        response.raise_for_status()
+        return response.json()
             
     def get_return_policies(self, limit=60, offset=0) -> dict:
         """

@@ -163,22 +163,20 @@ def offers_list(request):
         'current_filters': filters
     })
     
-    
+    # TO DO add aftersale all fields to the offer_create.html
 @login_required
 def offer_create(request):
     try:
         service = AllegroOfferService(request.user)
-        # 1. Sprawdzanie czy mamy wybrany produkt z parametru URL
         product_id = request.GET.get('product_id')
+        initial_data = {}
         
+        # Pobranie danych produktu jeśli mamy product_id
         if product_id:
-            # 2. Gdy mamy wybrany produkt z Allegro
             try:
-                # Pobierz szczegóły produktu z API Allegro
                 product_details = service.get_product_details(product_id)
-                print("Product Details:", product_details)
+                print("Product Details:", json.dumps(product_details, indent=2))
                 
-                # Przygotuj dane początkowe do formularza
                 initial_data = {
                     'name': product_details.get('name'),
                     'category_id': product_details.get('category', {}).get('id'),
@@ -189,69 +187,97 @@ def offer_create(request):
             except Exception as e:
                 messages.error(request, f"Błąd podczas pobierania danych produktu: {str(e)}")
                 return redirect('dashboard:product_search')
-        else:
-            # 3. Gdy tworzymy nowy produkt
-            initial_data = {}
 
-        # 4. Pobierz potrzebne dane do formularza
+        # Pobranie danych konfiguracyjnych
         shipping_rates = service.get_shipping_rates()
         warranties = service.get_implied_warranties()
+        implied_warranties = service.get_implied_warranties()
         return_policies = service.get_return_policies()
 
-        # 5. Obsługa wysyłania formularza
+        # Obsługa formularza
         if request.method == 'POST':
             try:
+                # Przygotowanie danych oferty
+                warranties = service.get_warranties()
+                implied_warranties = service.get_implied_warranties()
+                return_policies = service.get_return_policies()
+
+                # Znajdź domyślne ID lub pierwsze dostępne
+                warranty_id = next((w['id'] for w in warranties.get('warranties', [])), None)
+                implied_warranty_id = next((w['id'] for w in implied_warranties.get('impliedWarranties', [])), None)
+                return_policy_id = next((p['id'] for p in return_policies.get('returnPolicies', [])), None)
+
                 if product_id:
-                    # Tworzenie oferty z istniejącego produktu
-                    offer_data = _prepare_offer_data_with_product(request, product_id)
+                    offer_data = _prepare_offer_data_with_product(
+                        request, 
+                        product_id,
+                        warranty_id=warranty_id,
+                        implied_warranty_id=implied_warranty_id,
+                        return_policy_id=return_policy_id
+                    )
                 else:
-                    # Tworzenie oferty z nowym produktem
-                    offer_data = _prepare_offer_data(request)
-                    
-                # Wyślij ofertę do Allegro
-                response = service.create_offer(offer_data)
-
-                # 6. Zwróć odpowiedź
-                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                    # Dla żądań AJAX
-                    return JsonResponse({
-                        'success': True,
-                        'message': 'Pomyślnie utworzono ofertę'
-                    })
-                # Dla normalnych żądań
-                messages.success(request, "Pomyślnie utworzono ofertę")
-                return redirect('dashboard:allegro_offers')
+                    offer_data = _prepare_offer_data(
+                        request,
+                        warranty_id=warranty_id,
+                        implied_warranty_id=implied_warranty_id,
+                        return_policy_id=return_policy_id
+                    )
+                print("Wysyłane dane oferty:", json.dumps(offer_data, indent=2))
                 
-            except requests.exceptions.HTTPError as e:
-                # 7. Obsługa błędów
-                error_response = e.response.json()
-                error_message = error_response.get('errors', [{}])[0].get('userMessage', 'Unknown error')
-                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                    return JsonResponse({
-                        'success': False,
-                        'message': f'Błąd Allegro: {error_message}'
-                    }, status=400)
-                messages.error(request, f"Błąd Allegro: {error_message}")
+                try:
+                    response = service.create_offer(offer_data)
+                    messages.success(request, "Pomyślnie utworzono ofertę")
+                    return redirect('dashboard:allegro_offers')
+                    
+                except requests.exceptions.HTTPError as e:
+                    error_data = e.response.json()
+                    errors = error_data.get('errors', [])
+                    
+                    for error in errors:
+                        field = error.get('path', '').replace('productSet[0].product.', '')
+                        message = error.get('userMessage', '')
+                        details = error.get('details', '')
+                        
+                        error_msg = f"Błąd w polu '{field}': {message}"
+                        if details:
+                            error_msg += f" (Szczegóły: {details})"
+                            
+                        print(f"Error details: {error}")  # Debug log
+                        messages.error(request, error_msg)
+                        
+                    # Zachowaj wprowadzone dane
+                    return render(request, 'dashboard/integrations/offer_create.html', {
+                        'shipping_rates': shipping_rates.get('shippingRates', []),
+                        'warranties': warranties.get('impliedWarranties', []),
+                        'return_policies': return_policies.get('returnPolicies', []),
+                        'settings': AllegroDefaultSettings.objects.get_or_create(user=request.user)[0],
+                        'initial_data': initial_data,
+                        'product_id': product_id,
+                        'form_data': request.POST
+                    })
+                    
+            except Exception as e:
+                print(f"Exception during offer creation: {str(e)}")
+                messages.error(request, f"Wystąpił nieoczekiwany błąd: {str(e)}")
 
-        # 8. Wyrenderuj formularz
+        # Renderowanie formularza
         return render(request, 'dashboard/integrations/offer_create.html', {
             'shipping_rates': shipping_rates.get('shippingRates', []),
             'warranties': warranties.get('impliedWarranties', []),
             'return_policies': return_policies.get('returnPolicies', []),
             'settings': AllegroDefaultSettings.objects.get_or_create(user=request.user)[0],
-            'initial_data': initial_data,  # Dane początkowe do formularza
-            'product_id': product_id  # ID produktu jeśli istnieje
+            'initial_data': initial_data,
+            'product_id': product_id
         })
-
+        
     except Exception as e:
-        messages.error(request, f"Błąd: {str(e)}")
+        print(f"Unexpected error: {str(e)}")
+        messages.error(request, f"Wystąpił błąd: {str(e)}")
         return redirect('dashboard:allegro_offers')
 
-def _prepare_offer_data_with_product(request, product_id):
-    """Przygotowuje dane oferty dla istniejącego produktu"""
+def _prepare_offer_data_with_product(request, product_id, warranty_id=None, implied_warranty_id=None, return_policy_id=None):
     post_data = request.POST
     
-    # 1. Pobierz ustawienia użytkownika
     try:
         settings = AllegroDefaultSettings.objects.get(user=request.user)
     except AllegroDefaultSettings.DoesNotExist:
@@ -298,20 +324,20 @@ def _prepare_offer_data_with_product(request, product_id):
         "location": {
             "countryCode": "PL"
         },
-        # 8. Usługi posprzedażowe
-        "afterSalesServices": {
-            "impliedWarranty": {
-                "id": settings.implied_warranty if settings else None
-            },
-            "returnPolicy": {
-                "id": settings.return_policy if settings else None
-            },
-            "warranty": {
-                "id": settings.warranty_policy if settings else None
-            }
-        }
     }
+
+    # Dodaj afterSalesServices tylko jeśli mamy prawidłowe ID
+    after_sales = {}
+    if warranty_id:
+        after_sales["warranty"] = {"id": warranty_id}
+    if implied_warranty_id:
+        after_sales["impliedWarranty"] = {"id": implied_warranty_id}
+    if return_policy_id:
+        after_sales["returnPolicy"] = {"id": return_policy_id}
     
+    if after_sales:
+        data["afterSalesServices"] = after_sales
+
     print("Final Offer Data with Product:", data)
     return data
 
