@@ -6,7 +6,6 @@
 
 {% block content %}
 <div class="d-flex">
-    <!-- Sidebar -->
     <div class="d-flex flex-column flex-shrink-0 bg-dark text-white" style="width: 280px; min-height: 100vh;">
         <a href="{% url 'dashboard:dashboard_home' %}" class="d-flex align-items-center text-white text-decoration-none p-3">
             <img src="{% static 'assets/logo.png' %}" class="me-2" width="32" height="32">
@@ -29,7 +28,7 @@
                     </div>
                     <i class="fas fa-chevron-down"></i>
                 </a>
-                <div class="collapse" id="productSubmenu">
+                <div class="collapse show" id="productSubmenu">
                     <ul class="nav flex-column ms-3">
                         <li><a href="#" class="nav-link text-white">
                             <i class="fas fa-list me-2"></i>
@@ -62,7 +61,7 @@
                     </div>
                     <i class="fas fa-chevron-down"></i>
                 </a>
-                <div class="collapse" id="integrationsSubmenu">
+                <div class="collapse show" id="integrationsSubmenu">
                     <ul class="nav flex-column ms-3">
                         <li>
                             <a href="#" class="nav-link text-white d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#allegroSubmenu">
@@ -72,7 +71,7 @@
                                 </div>
                                 <i class="fas fa-chevron-down"></i>
                             </a>
-                            <div class="collapse" id="allegroSubmenu">
+                            <div class="collapse show" id="allegroSubmenu">
                                 <ul class="nav flex-column ms-3">
                                     <li><a href="{% url 'dashboard:allegro_integration' %}" class="nav-link text-white">
                                         <i class="fas fa-cogs me-2"></i>
@@ -94,7 +93,6 @@
                                         <i class="fas fa-chart-line me-2"></i>
                                         Obroty
                                     </a></li>
-                                    
                                 </ul>
                             </div>
                         </li>
@@ -116,14 +114,7 @@
         <!-- Top Bar -->
         <nav class="navbar navbar-expand-lg border-bottom">
             <div class="container-fluid">
-                <div class="d-flex align-items-center">
-                    <div class="input-group">
-                        <span class="input-group-text border-end-0">
-                            <i class="fas fa-search text-muted"></i>
-                        </span>
-                        <input type="text" class="form-control border-start-0" placeholder="Szukaj...">
-                    </div>
-                </div>
+                <div class="d-flex align-items-center"></div>
                 
                 <div class="d-flex align-items-center">
                     <a href="#" class="btn btn-warning me-2">
