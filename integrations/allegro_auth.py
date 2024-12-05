@@ -67,7 +67,6 @@ class AllegroAuth:
 
     
     def get_access_token(self, auth_code: str, code_verifier: str) -> Dict:
-        """Get initial access token and refresh token"""
         data = {
             'grant_type': 'authorization_code',
             'code': auth_code,
@@ -75,13 +74,27 @@ class AllegroAuth:
             'code_verifier': code_verifier
         }
         
-        response = requests.post(
-            self.token_url, 
-            data=data, 
-            auth=(self.client_id, self.client_secret)
-        )
-        response.raise_for_status()
-        return response.json()
+        auth = base64.b64encode(
+            f"{self.client_id}:{self.client_secret}".encode()
+        ).decode()
+        
+        headers = {
+            'Authorization': f'Basic {auth}',
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+        
+        try:
+            response = requests.post(
+                self.token_url,
+                data=data,
+                headers=headers, 
+                timeout=10,
+                verify=True
+            )
+            response.raise_for_status()
+            return response.json()
+        except requests.RequestException as e:
+            raise Exception(f"Błąd autoryzacji: {str(e)}")
 
     def refresh_access_token(self, refresh_token: str) -> Dict:
         data = {
@@ -89,18 +102,32 @@ class AllegroAuth:
             'refresh_token': refresh_token
         }
         
+        auth = base64.b64encode(
+            f"{self.client_id}:{self.client_secret}".encode()
+        ).decode()
+        
+        headers = {
+            'Authorization': f'Basic {auth}',
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+        
         try:
-            response = requests.post(
+            # Zwiększony timeout i dodane retries
+            session = requests.Session()
+            adapter = requests.adapters.HTTPAdapter(max_retries=3)
+            session.mount('https://', adapter)
+            
+            response = session.post(
                 self.token_url,
-                data=data,
-                auth=(self.client_id, self.client_secret),
-                allow_redirects=False,
-                
+                data=data, 
+                headers=headers,
+                timeout=30
             )
             response.raise_for_status()
             return response.json()
-        except requests.exceptions.HTTPError as e:
-            print(f"API Error Response: {e.response.text}")
+            
+        except Exception as e:
+            print(f"Refresh error details: {str(e)}")  # Debug log
             raise
 
     def make_request(self, endpoint: str, method: str = 'GET', 

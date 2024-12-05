@@ -26,7 +26,7 @@ class AllegroOfferService:
         offer_id = offer_id.lstrip('/')
         
         url = f"{self.base_url}/sale/product-offers/{offer_id}"
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, timeout=10)
         
         if response.status_code == 404:
             raise Http404("Offer not found")
@@ -39,7 +39,7 @@ class AllegroOfferService:
             'Accept': 'application/vnd.allegro.public.v1+json'
         }
         params = filters or {}
-        response = requests.get(f"{self.base_url}/sale/offers", headers=headers, params=params)
+        response = requests.get(f"{self.base_url}/sale/offers", headers=headers, params=params, timeout=10)
         return response.json()
     
     def get_offer_events(self, params=None):
@@ -50,7 +50,8 @@ class AllegroOfferService:
         response = requests.get(
             f"{self.base_url}/sale/offer-events",
             headers=headers,
-            params=params
+            params=params,
+            timeout=10
         )
         return response.json()
 
@@ -121,7 +122,8 @@ class AllegroOfferService:
         response = requests.get(
             f"{self.base_url}/sale/product-offers/{offer_id}/operations/{operation_id}",
             headers=self._get_headers(), 
-            allow_redirects=False
+            allow_redirects=False,
+            timeout=10
         )
         
         if response.status_code == 303:
@@ -486,7 +488,8 @@ class AllegroOfferService:
         """
         response = requests.get(
             f"{self.base_url}/sale/offers/{offer_id}/rating",
-            headers=self._get_headers()
+            headers=self._get_headers(),
+            timeout=10
         )
         response.raise_for_status()
         return response.json()

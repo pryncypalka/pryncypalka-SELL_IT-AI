@@ -31,6 +31,7 @@ ALLEGRO_CLIENT_SECRET = os.getenv("ALLEGRO_CLIENT_SECRET", None)
 ALLEGRO_TOKEN_URL = "https://allegro.pl.allegrosandbox.pl/auth/oauth/token"
 ALLEGRO_API_URL = "https://api.allegro.pl.allegrosandbox.pl"
 ALLEGRO_UPLOAD_URL = 'https://upload.allegro.pl.allegrosandbox.pl'
+ALLEGRO_REQUEST_TIMEOUT = 10
 
 
 # Quick-start development settings - unsuitable for production

@@ -163,7 +163,7 @@ def offers_list(request):
         'current_filters': filters
     })
     
-    # TO DO add aftersale all fields to the offer_create.html
+    # TO DO add aftersale all fields to the offer_create.html and fix photos loading
 @login_required
 def offer_create(request):
     try:
@@ -436,6 +436,79 @@ def _process_parameters(post_data):
                 })
     print(f"Processed Parameters: {parameters}")
     return parameters
+
+
+@login_required
+def offer_edit(request, offer_id):
+    service = AllegroOfferService(request.user)
+    
+    try:
+        offer = service.get_offer(offer_id)
+        
+        if request.method == 'POST':
+            try:
+                price = request.POST.get('price')
+                if not price:
+                    messages.error(request, "Cena jest wymagana")
+                    return redirect(request.path)
+
+                status = 'ACTIVE' if request.POST.get('status') == 'on' else 'INACTIVE'
+                
+                data = {
+                    "name": request.POST.get('name', offer.get('name')),
+                    "sellingMode": {
+                        "format": offer['sellingMode'].get('format', 'BUY_NOW'),
+                        "price": {
+                            "amount": price,
+                            "currency": "PLN"
+                        }
+                    },
+                    "stock": {
+                        "available": int(request.POST.get('quantity', 1)),
+                        "unit": "UNIT"
+                    },
+                    "publication": {
+                        "status": status
+                    }
+                }
+                
+                # Zachowaj oryginalne wartości
+                if 'category' in offer:
+                    data['category'] = offer['category']
+                if 'parameters' in offer:
+                    data['parameters'] = offer['parameters']
+                if 'description' in offer:
+                    data['description'] = offer['description']
+                if 'delivery' in offer:
+                    data['delivery'] = offer['delivery']
+                if 'images' in offer:
+                    data['images'] = offer['images']
+                if 'afterSalesServices' in offer:
+                    data['afterSalesServices'] = offer['afterSalesServices']
+                
+                result = service.edit_offer(offer_id, data)
+                messages.success(request, "Oferta została zaktualizowana")
+                return redirect('dashboard:allegro_offers')
+                
+            except requests.exceptions.HTTPError as e:
+                error_data = e.response.json()
+                for error in error_data.get('errors', []):
+                    msg = f"{error.get('userMessage', 'Błąd')}"
+                    if 'metadata' in error and 'productId' in error['metadata']:
+                        msg += f" (Product ID: {error['metadata']['productId']})"
+                    messages.error(request, msg)
+            except Exception as e:
+                messages.error(request, str(e))
+            
+            return redirect(request.path)
+            
+        return render(request, 'dashboard/integrations/offer_edit.html', {
+            'offer': offer
+        })
+        
+    except Exception as e:
+        messages.error(request, str(e))
+        return redirect('dashboard:allegro_offers')
 
 @login_required
 def get_categories(request, parent_id=None):

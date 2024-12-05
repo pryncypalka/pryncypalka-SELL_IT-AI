@@ -49,9 +49,13 @@
                                 </small>
                             </div>
                         </div>
-                        <div class="card-footer">
-                            <a href="{% url 'dashboard:allegro_offer_detail' offer_id=offer.id %}" class="btn btn-outline-primary">Szczegóły</a>
-
+                        <div class="card-footer d-flex justify-content-between">
+                            <a href="{% url 'dashboard:allegro_offer_detail' offer_id=offer.id %}" class="btn btn-outline-light">
+                                <i class="fas fa-info-circle me-1"></i> Szczegóły
+                            </a>
+                            <a href="{% url 'dashboard:allegro_offer_edit' offer_id=offer.id %}" class="btn btn-outline-warning">
+                                <i class="fas fa-edit me-1"></i> Edytuj
+                            </a>
                         </div>
                     </div>
                 </div>

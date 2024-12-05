@@ -1,0 +1,199 @@
+{% extends "dashboard/home.html" %}
+{% load static %}
+
+{% block dashboard_content %}
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Edycja oferty</h5>
+            <div>
+                <button type="button" class="btn btn-outline-secondary me-2" onclick="history.back()">
+                    <i class="fas fa-arrow-left me-1"></i> Powrót
+                </button>
+                <button type="submit" form="editForm" class="btn btn-primary">
+                    <i class="fas fa-save me-1"></i> Zapisz zmiany
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <form id="editForm" method="post">
+                {% csrf_token %}
+                
+                <div class="row mb-4">
+                    <div class="col-md-8">
+                        <!-- Basic Info -->
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h6 class="mb-0">Podstawowe informacje</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label class="form-label">Nazwa oferty</label>
+                                    <input type="text" class="form-control" name="name" value="{{ offer.name }}">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Cena</label>
+                                    <div class="input-group">
+                                        <input type="number" step="0.01" class="form-control" name="price" 
+                                               value="{{ offer.sellingMode.price.amount }}">
+                                        <span class="input-group-text">PLN</span>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Ilość</label>
+                                    <input type="number" class="form-control" name="quantity" 
+                                           value="{{ offer.stock.available }}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Parameters -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Parametry</h6>
+                            </div>
+                            <div class="card-body">
+                                <div id="parametersContainer">
+                                    {% for param in offer.parameters %}
+                                    <div class="mb-3">
+                                        <label class="form-label">{{ param.name }}</label>
+                                        <input type="text" class="form-control" 
+                                               name="param_{{ param.id }}" 
+                                               value="{{ param.values|first }}">
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <!-- Images -->
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h6 class="mb-0">Zdjęcia</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-2" id="imagePreview">
+                                    {% for image in offer.images %}
+                                    <div class="col-6">
+                                        <div class="card">
+                                            <img src="{{ image.url }}" class="card-img-top" alt="Product image">
+                                            <div class="card-body p-2">
+                                                <button type="button" class="btn btn-sm btn-danger w-100 delete-image"
+                                                        data-image-id="{{ image.id }}">
+                                                    Usuń
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="mt-3">
+                                    <input type="file" class="form-control" id="newImages" multiple accept="image/*">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Publication -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Publikacja</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="publicationStatus" 
+                                           name="status" {% if offer.publication.status == 'ACTIVE' %}checked{% endif %}>
+                                    <label class="form-check-label" for="publicationStatus">
+                                        Oferta aktywna
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('editForm');
+    const imageInput = document.getElementById('newImages');
+    
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        
+        try {
+            const response = await fetch(`/api/allegro/offers/{{ offer.id }}/edit/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: formData
+            });
+            
+            if (response.ok) {
+                const result = await response.json();
+                window.location.href = '{% url "dashboard:allegro_offers" %}';
+            } else {
+                const error = await response.json();
+                alert(error.message || 'Wystąpił błąd podczas zapisywania zmian');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Wystąpił błąd podczas zapisywania zmian');
+        }
+    });
+
+    // Handle image uploads
+    imageInput.addEventListener('change', handleImageUpload);
+});
+
+async function handleImageUpload(e) {
+    const files = Array.from(e.target.files);
+    for (const file of files) {
+        const formData = new FormData();
+        formData.append('image', file);
+        
+        try {
+            const response = await fetch('/api/allegro/upload-image/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: formData
+            });
+            
+            if (response.ok) {
+                const result = await response.json();
+                addImagePreview(result.url);
+            }
+        } catch (error) {
+            console.error('Upload error:', error);
+        }
+    }
+}
+
+function addImagePreview(url) {
+    const preview = document.getElementById('imagePreview');
+    const div = document.createElement('div');
+    div.className = 'col-6';
+    div.innerHTML = `
+        <div class="card">
+            <img src="${url}" class="card-img-top" alt="Product image">
+            <div class="card-body p-2">
+                <button type="button" class="btn btn-sm btn-danger w-100 delete-image">Usuń</button>
+            </div>
+        </div>
+    `;
+    preview.appendChild(div);
+}
+</script>
+{% endblock %}

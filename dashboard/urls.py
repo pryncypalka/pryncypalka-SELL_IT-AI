@@ -17,10 +17,11 @@ urlpatterns = [
     path('allegro/offers/detail/<str:offer_id>/', views_allegro.offer_detail, name='allegro_offer_detail'),
     path('allegro/offers/create/', views_allegro.offer_create, name='allegro_offer_create'),
     path('allegro/offers/create/<str:product_id>/', views_allegro.offer_create, name='allegro_offer_create_with_product'),
-    
+    path('allegro/offers/<str:offer_id>/edit/', views_allegro.offer_edit, name='allegro_offer_edit'),
+
     path('allegro/products/search/', views_allegro.product_search, name='allegro_product_search'),
     path('allegro/categories/', views_allegro.categories_view, name='allegro_categories_view'),
-    
+
     # API Endpoints
 
     path('api/allegro/categories/', views_allegro.get_categories, name='allegro_categories'),
