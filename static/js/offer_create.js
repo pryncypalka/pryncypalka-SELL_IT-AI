@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const imagePreview = document.getElementById('imagePreview');
     const uploadedImagesContainer = document.getElementById('uploadedImages');
     const productId = document.getElementById('productId')?.value;
+    
 
     // Inicjalizacja zmiennych
     let debounceTimer;
@@ -97,18 +98,23 @@ document.addEventListener('DOMContentLoaded', function() {
             renderParameters(initialData.parameters);
         }
 
-        // Wstępnie załaduj zdjęcia
         if (initialData.images && initialData.images.length > 0) {
             console.log("Setting images:", initialData.images);
-            initialData.images.forEach(imageUrl => {
-                uploadedImages.push(imageUrl);
-                
+            uploadedImages = [...initialData.images]; // Utwórz kopię tablicy
+            
+            // Wyczyść kontenery przed dodaniem nowych zdjęć
+            imagePreview.innerHTML = '';
+            uploadedImagesContainer.innerHTML = '';
+            
+            initialData.images.forEach((imageUrl, index) => {
+                // Dodaj ukryte inputy
                 const input = document.createElement('input');
                 input.type = 'hidden';
                 input.name = 'images[]';
                 input.value = imageUrl;
                 uploadedImagesContainer.appendChild(input);
-
+    
+                // Dodaj podgląd zdjęcia
                 const previewDiv = document.createElement('div');
                 previewDiv.className = 'col-md-3 mb-2';
                 previewDiv.innerHTML = `
@@ -117,7 +123,8 @@ document.addEventListener('DOMContentLoaded', function() {
                              style="height: 150px; object-fit: cover;">
                         ${!productId ? `
                             <div class="card-body p-2">
-                                <button type="button" class="btn btn-sm btn-danger w-100">Usuń</button>
+                                <button type="button" class="btn btn-sm btn-danger delete-image w-100" 
+                                        data-index="${index}">Usuń</button>
                             </div>
                         ` : ''}
                     </div>
@@ -126,6 +133,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     }
+    
 
     // Jeśli mamy wybrany produkt, ukryj/zablokuj niektóre pola
     if (productId) {
@@ -153,6 +161,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // Create preview
         const previewDiv = document.createElement('div');
         previewDiv.className = 'col-md-3 mb-2';
+        
+        // Utwórz unikalny identyfikator dla tego uploadu
+        const uploadId = Date.now();
+        
         previewDiv.innerHTML = `
             <div class="card h-100">
                 <div class="position-relative">
@@ -165,16 +177,16 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 </div>
                 <div class="card-body p-2">
-                    <button type="button" class="btn btn-sm btn-danger w-100" disabled>Usuń</button>
+                    <button type="button" class="btn btn-sm btn-danger delete-image w-100" disabled>Usuń</button>
                 </div>
             </div>
         `;
         imagePreview.appendChild(previewDiv);
-
+    
         // Upload to server
         const formData = new FormData();
         formData.append('image', file);
-
+    
         try {
             const response = await fetch('/api/allegro/upload-image/', {
                 method: 'POST',
@@ -183,7 +195,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 body: formData
             });
-
+    
             if (!response.ok) throw new Error('Upload failed');
             
             const result = await response.json();
@@ -194,6 +206,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const deleteBtn = previewDiv.querySelector('.btn-danger');
             overlay.remove();
             deleteBtn.disabled = false;
+            deleteBtn.dataset.index = uploadedImages.length - 1;
             
             updateHiddenInputs();
         } catch (error) {
@@ -205,12 +218,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Delete image handler
     imagePreview.addEventListener('click', function(e) {
-        if (e.target.matches('.btn-danger')) {
-            const imageContainer = e.target.closest('.col-md-3');
-            const index = Array.from(imagePreview.children).indexOf(imageContainer);
-            uploadedImages.splice(index, 1);
-            imageContainer.remove();
-            updateHiddenInputs();
+        if (e.target.matches('.delete-image')) {
+            const index = parseInt(e.target.dataset.index);
+            if (!isNaN(index) && index >= 0 && index < uploadedImages.length) {
+                uploadedImages.splice(index, 1);
+                // Usuń element z DOM
+                e.target.closest('.col-md-3').remove();
+                // Zaktualizuj indeksy pozostałych przycisków
+                document.querySelectorAll('.delete-image').forEach((btn, i) => {
+                    btn.dataset.index = i;
+                });
+                updateHiddenInputs();
+            }
         }
     });
 
