@@ -67,6 +67,9 @@ class AllegroAuth:
 
     
     def get_access_token(self, auth_code: str, code_verifier: str) -> Dict:
+        """
+        Get access token using authorization code and PKCE verifier
+        """
         data = {
             'grant_type': 'authorization_code',
             'code': auth_code,
@@ -94,7 +97,8 @@ class AllegroAuth:
             response.raise_for_status()
             return response.json()
         except requests.RequestException as e:
-            raise Exception(f"Błąd autoryzacji: {str(e)}")
+            print(f"Token exchange error: {str(e)}")  # Debug log
+            raise Exception(f"Authorization error: {str(e)}")
 
     def refresh_access_token(self, refresh_token: str) -> Dict:
         data = {

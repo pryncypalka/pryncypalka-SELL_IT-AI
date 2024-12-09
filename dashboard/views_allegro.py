@@ -36,11 +36,11 @@ def allegro_auth_start(request):
     allegro = get_allegro_client()
     auth_url, code_verifier = allegro.get_authorization_url()
     
-    # Store code_verifier in session for later use
+    # Store code_verifier in session
     request.session['allegro_code_verifier'] = code_verifier
+    request.session.modified = True  # Upewnij się, że sesja zostanie zapisana
     
     return redirect(auth_url)
-
 @login_required
 def allegro_auth_callback(request):
     error = request.GET.get('error')
@@ -51,8 +51,11 @@ def allegro_auth_callback(request):
     code = request.GET.get('code')
     code_verifier = request.session.get('allegro_code_verifier')
     
-    if not code or not code_verifier:
-        return HttpResponseBadRequest("Invalid request")
+    if not code:
+        return HttpResponseBadRequest("No authorization code provided")
+        
+    if not code_verifier:
+        return HttpResponseBadRequest("No code verifier found in session")
     
     try:
         allegro = get_allegro_client()
@@ -69,20 +72,17 @@ def allegro_auth_callback(request):
             }
         )
         
+        # Wyczyść dane z sesji
+        request.session.pop('allegro_code_verifier', None)
+        
         messages.success(request, "Successfully connected to Allegro!")
+        return redirect('dashboard:allegro_integration')
         
     except Exception as e:
+        print(f"Authorization error: {str(e)}")  # Debug log
         messages.error(request, f"Failed to connect to Allegro: {str(e)}")
-        
-    finally:
-        request.session.pop('allegro_code_verifier', None)
-    
-    return redirect('dashboard:allegro_integration')
+        return redirect('dashboard:allegro_integration')
 
-@login_required
-def allegro_disconnect(request):
-    messages.info(request, "To completely disconnect from Allegro, please visit Allegro's Connected Applications page in your Allegro account settings and remove access for this application.")
-    return redirect('dashboard:allegro_integration')
 
 @login_required 
 def allegro_configuration(request):
