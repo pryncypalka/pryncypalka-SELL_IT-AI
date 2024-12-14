@@ -3,6 +3,7 @@ from django.utils import timezone
 from django.conf import settings
 from .allegro_auth import AllegroAuth
 from django.db.models import JSONField
+from simple_history.models import HistoricalRecords
 
 def get_allegro_client():
     return AllegroAuth(
@@ -51,6 +52,7 @@ class Category(models.Model):
     name = models.CharField(max_length=255)
     parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE)
     parameters = JSONField(default=dict)
+    history = HistoricalRecords()
 
 class Product(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -64,6 +66,7 @@ class Product(models.Model):
     stock = models.IntegerField(default=0)  # Aktualny stan magazynowy
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    history = HistoricalRecords()
 
     def update_allegro_offers(self):
         """Aktualizuje wszystkie oferty na Allegro dla tego produktu"""
@@ -79,6 +82,7 @@ class ProductImage(models.Model):
     product = models.ForeignKey(Product, related_name='images', on_delete=models.CASCADE)
     image = models.ImageField(upload_to='products/')
     order = models.IntegerField(default=0)
+    history = HistoricalRecords()
     
     
 class AllegroOffer(models.Model):
@@ -156,6 +160,7 @@ class AllegroOffer(models.Model):
     views = models.IntegerField(default=0)
     watches = models.IntegerField(default=0)
     sales = models.IntegerField(default=0)
+    history = HistoricalRecords()
 
     def __str__(self):
         return f"{self.name} ({self.publication_status})"
@@ -190,6 +195,7 @@ class AllegroDefaultSettings(models.Model):
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    history = HistoricalRecords()
     
     class Meta:
         verbose_name = "Allegro Default Settings"
@@ -233,6 +239,7 @@ class AllegroOrder(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     allegro_created_at = models.DateTimeField(null=True) 
+    history = HistoricalRecords()
 
     class Meta:
         ordering = ['-created_at']

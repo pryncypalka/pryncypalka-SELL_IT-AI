@@ -71,6 +71,7 @@ INSTALLED_APPS = [
     'jazzmin',
     'django.contrib.admin',
     'rest_framework',
+    'simple_history',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -78,7 +79,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'accounts',
     'dashboard',
-    'offers',
     'integrations',
 ]
 
@@ -91,6 +91,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     # 'project.middleware.NgrokSkipWarningMiddleware',
+    'simple_history.middleware.HistoryRequestMiddleware',
 ]
 
 ROOT_URLCONF = 'project.urls'
