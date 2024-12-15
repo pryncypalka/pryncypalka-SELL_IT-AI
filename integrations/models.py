@@ -257,7 +257,9 @@ class OpenAIRequest(models.Model):
     
     offer = models.ForeignKey(
         'AllegroOffer', 
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        null=True,  
+        blank=True  
     )
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, 
@@ -277,7 +279,7 @@ class OpenAIRequest(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"OpenAI Request for {self.offer.name} by {self.user.username}"
+        return f"OpenAI Request by {self.user.username}"
 
 
 class OpenAIInstruction(models.Model):

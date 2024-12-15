@@ -32,7 +32,46 @@
                 <label>Tytuł oferty</label>
                 <input name="name" type="text" class="form-control" maxlength="75" required>
             </div>
-            
+            <!-- AI Description Generation -->
+            <div class="card mb-4" id="aiDescriptionCard">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Generowanie opisu AI</h5>
+                        <button type="button" class="btn btn-primary btn-sm" id="generateDescription">
+                            Generuj opis
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label>Model AI</label>
+                                <select class="form-select" id="aiModel">
+                                    <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                                    <option value="gpt-4">GPT-4</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label>Długość opisu</label>
+                                <select class="form-select" id="descriptionLength">
+                                    <option value="short">Krótki opis</option>
+                                    <option value="medium">Średni opis</option>
+                                    <option value="long">Długi opis</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label>Dodatkowe informacje dla AI</label>
+                        <textarea class="form-control" id="additionalInfo" rows="3" 
+                                placeholder="Wprowadź dodatkowe informacje o produkcie, które chcesz uwzględnić w opisie..."></textarea>
+                    </div>
+                </div>
+            </div>
+
             <div class="mb-3">
                 <label>Opis</label>
                 <textarea name="description" id="description" class="form-control" rows="5"></textarea>
@@ -89,6 +128,23 @@
             </div>
 
             <div class="row">
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label>Stan przedmiotu</label>
+                        <select name="param_11323" class="form-select" required>
+                            <option value="">Wybierz stan</option>
+                            <option value="NOWY">Nowy</option>
+                            <option value="UŻYWANY">Używany</option>
+                            <option value="PO_ZWROCIE">Po zwrocie</option>
+                            <option value="NA_CZĘŚCI">Na części</option>
+                            <option value="NIEPEŁNY_KOMPLET">Niepełny komplet</option>
+                            <option value="NOWY_Z_DEFEKTEM">Nowy z defektem</option>
+                            <option value="POWYSTAWOWY">Powystawowy</option>
+                            <option value="USZKODZONY">Uszkodzony</option>
+                            <option value="PRZEPAKOWANY">Przepakowany</option>
+                        </select>
+                    </div>
+                </div>
                 <div class="col-md-4">
                     <div class="mb-3">
                         <label>Czas trwania</label>
@@ -155,20 +211,48 @@
         </div>
     </div> 
     <div class="card mb-4">
-        <div class="card-header">
-            <h5 class="mb-0">Zdjęcia</h5>
-        </div>
-        <div class="card-body">
-            <div class="mb-3">
-                <input type="file" id="images" class="form-control mb-2" multiple accept="image/*">
-                <div id="imagePreview" class="row g-2 mt-2">
-                    <!-- Tu będą renderowane miniatury -->
+    <div class="card-header">
+        <h5 class="mb-0">Zdjęcia</h5>
+    </div>
+    <div class="card-body">
+        <!-- Istniejące zdjęcia z produktu -->
+        <div id="existingImages" class="row g-2 mb-3">
+            {% if initial_data.images %}
+                {% for image_url in initial_data.images %}
+                <div class="col-md-3 col-sm-4 col-6">
+                    <div class="card h-100">
+                        <img src="{{ image_url }}" class="card-img-top" alt="Product image">
+                        <div class="card-body p-2">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="{{ image_url }}" 
+                                       name="existing_images[]" checked>
+                                <label class="form-check-label">Użyj zdjęcia</label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <!-- Lista przesłanych zdjęć jako hidden inputy -->
-            <div id="uploadedImages"></div>
+                {% endfor %}
+            {% endif %}
         </div>
-    </div> 
+
+        <!-- Dodawanie nowych zdjęć -->
+        <div class="mb-3">
+            <label class="form-label">Dodaj nowe zdjęcia</label>
+            <input type="file" id="images" class="form-control mb-2" multiple accept="image/*">
+            <div id="imagePreview" class="row g-2 mt-2">
+                <!-- Tu będą renderowane miniatury nowych zdjęć -->
+            </div>
+        </div>
+        <!-- Lista przesłanych zdjęć jako hidden inputy -->
+        <div id="uploadedImages">
+            {% if initial_data.images %}
+                {% for image_url in initial_data.images %}
+                <input type="hidden" name="images[]" value="{{ image_url }}">
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+</div>
 
 
     <div class="d-flex justify-content-end gap-2 mb-4">

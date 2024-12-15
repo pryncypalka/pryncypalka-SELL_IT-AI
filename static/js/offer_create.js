@@ -473,3 +473,142 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize default categories
     loadCategories();
 });
+
+
+// Funkcja do generowania opisu
+document.getElementById('generateDescription').addEventListener('click', async function() {
+    const productName = document.querySelector('input[name="name"]').value;
+    const additionalInfo = document.getElementById('additionalInfo').value;
+    const model = document.getElementById('aiModel').value;
+    const length = document.getElementById('descriptionLength').value;
+    
+    // Zbierz wszystkie parametry z formularza
+    const parameters = [];
+    const paramInputs = document.querySelectorAll('[name^="param_"]');
+    paramInputs.forEach(input => {
+        const paramId = input.name.replace('param_', '');
+        const paramName = input.previousElementSibling?.textContent || '';
+        parameters.push({
+            name: paramName,
+            values: [input.value]
+        });
+    });
+
+    try {
+        const response = await fetch('/generate-description/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify({
+                name: productName,
+                parameters: parameters,
+                additionalInfo: additionalInfo,
+                model: model,
+                length: length
+            })
+        });
+
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            // Zakładając, że używamy CKEditor
+            const editor = CKEDITOR.instances.description;
+            if (editor) {
+                editor.setData(data.description);
+            }
+        } else {
+            alert('Wystąpił błąd podczas generowania opisu: ' + data.message);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Wystąpił błąd podczas generowania opisu');
+    }
+});
+
+document.getElementById('images').addEventListener('change', async function(e) {
+    const files = Array.from(e.target.files);
+    const imagePreview = document.getElementById('imagePreview');
+    const uploadedImagesDiv = document.getElementById('uploadedImages');
+    
+    for (let file of files) {
+        try {
+            const formData = new FormData();
+            formData.append('image', file);
+            
+            const response = await fetch('/upload-offer-image/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: formData
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                // Dodaj miniaturę
+                const col = document.createElement('div');
+                col.className = 'col-md-3 col-sm-4 col-6';
+                col.innerHTML = `
+                    <div class="card h-100">
+                        <img src="${data.url}" class="card-img-top" alt="Uploaded image">
+                        <div class="card-body p-2">
+                            <button type="button" class="btn btn-sm btn-danger remove-image">
+                                Usuń
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                // Dodaj hidden input z URL-em
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'images[]';
+                input.value = data.url;
+                uploadedImagesDiv.appendChild(input);
+                
+                imagePreview.appendChild(col);
+                
+                // Dodaj obsługę usuwania
+                col.querySelector('.remove-image').addEventListener('click', function() {
+                    col.remove();
+                    input.remove();
+                });
+            }
+        } catch (error) {
+            console.error('Error uploading image:', error);
+            alert('Błąd podczas przesyłania zdjęcia');
+        }
+    }
+});
+
+// Obsługa istniejących zdjęć
+document.querySelectorAll('input[name="existing_images[]"]').forEach(checkbox => {
+    checkbox.addEventListener('change', function() {
+        const url = this.value;
+        const existingInputs = document.querySelectorAll('input[name="images[]"]');
+        
+        if (this.checked) {
+            // Dodaj URL do ukrytych inputów, jeśli jeszcze nie istnieje
+            let exists = false;
+            existingInputs.forEach(input => {
+                if (input.value === url) exists = true;
+            });
+            
+            if (!exists) {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'images[]';
+                input.value = url;
+                document.getElementById('uploadedImages').appendChild(input);
+            }
+        } else {
+            // Usuń URL z ukrytych inputów
+            existingInputs.forEach(input => {
+                if (input.value === url) input.remove();
+            });
+        }
+    });
+});

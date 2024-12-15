@@ -34,14 +34,6 @@
                             <i class="fas fa-list me-2"></i>
                             Lista produktów
                         </a></li>
-                        <li><a href="#" class="nav-link text-white">
-                            <i class="fas fa-warehouse me-2"></i>
-                            Kontrola zapasów
-                        </a></li>
-                        <li><a href="#" class="nav-link text-white">
-                            <i class="fas fa-file-import me-2"></i>
-                            Importuj/Eksportuj
-                        </a></li>
                     </ul>
                 </div>
             </li>
@@ -101,7 +93,7 @@
             </li>
 
             <li>
-                <a href="#" class="nav-link text-white">
+                <a href="{% url 'dashboard:user_settings' %}" class="nav-link text-white">
                     <i class="fas fa-cog me-3"></i>
                     Ustawienia
                 </a>
@@ -117,9 +109,7 @@
                 <div class="d-flex align-items-center"></div>
                 
                 <div class="d-flex align-items-center">
-                    <a href="#" class="btn btn-warning me-2">
-                        <i class="fas fa-question-circle"></i>
-                    </a>
+                   
                     <a href="#" class="btn btn-info me-2">
                         <i class="fas fa-bell"></i>
                     </a>
@@ -129,7 +119,7 @@
                             {{ request.user.username }}
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="#">
+                            <li><a class="dropdown-item" href="{% url 'dashboard:user_settings' %}">
                                 <i class="fas fa-user-cog me-2"></i> Ustawienia
                             </a></li>
                             <li><hr class="dropdown-divider"></li>

@@ -278,6 +278,9 @@ def offer_create(request):
 def _prepare_offer_data_with_product(request, product_id, warranty_id=None, implied_warranty_id=None, return_policy_id=None):
     post_data = request.POST
     
+    # Pobierz wszystkie zdjęcia (istniejące i nowe)
+    image_urls = post_data.getlist('images[]')
+    
     try:
         settings = AllegroDefaultSettings.objects.get(user=request.user)
     except AllegroDefaultSettings.DoesNotExist:
@@ -325,6 +328,9 @@ def _prepare_offer_data_with_product(request, product_id, warranty_id=None, impl
             "countryCode": "PL"
         },
     }
+    
+    if image_urls:
+        data["images"] = image_urls
 
     # Dodaj afterSalesServices tylko jeśli mamy prawidłowe ID
     after_sales = {}

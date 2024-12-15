@@ -32,4 +32,11 @@ urlpatterns = [
     path('api/allegro/products/select/', views_allegro.select_product_api, name='allegro_select_product'),
     
     path('api/allegro/upload-image/', views_allegro.upload_offer_image, name='allegro_upload_image'),
+    
+    
+    path('generate-description/', views.generate_offer_description, name='generate_description'),
+    
+    path('settings/', views.user_settings, name='user_settings'),
+    path('settings/update/', views.user_settings_update, name='user_settings_update'),
+
 ]
