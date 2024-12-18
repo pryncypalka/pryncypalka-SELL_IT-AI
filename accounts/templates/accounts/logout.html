@@ -7,11 +7,11 @@
         <div class="row justify-content-center">
             <div class="col-md-6 col-lg-5">
                 {% if user.is_authenticated %}
-                    <!-- Confirmation Card for Authenticated Users -->
+                    <!-- Potwierdzenie wylogowania dla zalogowanych użytkowników -->
                     <div class="text-center mb-4">
                         <img src="{% static 'assets/logo.png' %}" alt="SELLIT_AI" class="mb-3" height="48">
-                        <h4 class="text-dark mb-1">Sign Out?</h4>
-                        <p class="text-muted">Are you sure you want to leave?</p>
+                        <h4 class="text-dark mb-1">Wylogować się?</h4>
+                        <p class="text-muted">Czy na pewno chcesz opuścić aplikację?</p>
                     </div>
 
                     <div class="card shadow-sm bg-secondary">
@@ -20,55 +20,51 @@
                                 {% csrf_token %}
                                 <div class="mb-4">
                                     <i class="fas fa-sign-out-alt text-warning fa-3x mb-3"></i>
-                                    <h5 class="card-title">Confirm Logout</h5>
+                                    <h5 class="card-title">Potwierdź wylogowanie</h5>
                                     <p class="card-text text-muted">
-                                        You're about to sign out from SELLIT_AI
+                                        Jesteś o krok od wylogowania z SELLIT_AI
                                     </p>
                                 </div>
                                 
                                 <div class="d-grid gap-2">
                                     <button type="submit" class="btn btn-primary">
-                                        <i class="fas fa-sign-out-alt me-2"></i>Yes, Sign Out
+                                        <i class="fas fa-sign-out-alt me-2"></i>Tak, wyloguj
                                     </button>
                                     <a href="{% url 'dashboard:dashboard_home' %}" class="btn btn-light">
-                                        <i class="fas fa-times me-2"></i>Cancel
+                                        <i class="fas fa-times me-2"></i>Anuluj
                                     </a>
                                 </div>
                             </form>
                         </div>
                     </div>
                 {% else %}
-                    <!-- Already Logged Out Message -->
+                    <!-- Komunikat o wylogowaniu -->
                     <div class="text-center mb-4">
                         <img src="{% static 'assets/logo.png' %}" alt="SELLIT_AI" class="mb-3" height="48">
-                        <h4 class="text-dark mb-1">See you soon!</h4>
-                        <p class="text-muted">You have been successfully logged out</p>
+                        <h4 class="text-dark mb-1">Do zobaczenia wkrótce!</h4>
+                        <p class="text-muted">Zostałeś pomyślnie wylogowany</p>
                     </div>
 
                     <div class="card shadow-sm bg-secondary">
                         <div class="card-body p-4 text-center">
                             <div class="mb-4">
                                 <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
-                                <h5 class="card-title">Logged Out Successfully</h5>
+                                <h5 class="card-title">Wylogowano pomyślnie</h5>
                                 <p class="card-text text-muted">
-                                    Thank you for using SELLIT_AI. We hope to see you again soon!
+                                    Dziękujemy za korzystanie z SELLIT_AI. Mamy nadzieję, że wkrótce znów nas odwiedzisz!
                                 </p>
                             </div>
                             
                             <div class="d-grid">
                                 <a href="{% url 'accounts:login' %}" class="btn btn-primary">
-                                    <i class="fas fa-sign-in-alt me-2"></i>Sign In Again
+                                    <i class="fas fa-sign-in-alt me-2"></i>Zaloguj ponownie
                                 </a>
                             </div>
                         </div>
                     </div>
                 {% endif %}
 
-                <!-- Help Section -->
-                <div class="text-center mt-4">
-                    <span class="text-muted">Need help?</span>
-                    <a href="#" class="text-decoration-none">Contact Support</a>
-                </div>
+                
             </div>
         </div>
     </div>

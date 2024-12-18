@@ -6,21 +6,21 @@
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-6 col-lg-5">
-                <!-- Logo & Title -->
+                <!-- Logo i Tytuł -->
                 <div class="text-center mb-4">
                     <img src="{% static 'assets/logo.png' %}" alt="SELLIT_AI" class="mb-3" height="48">
-                    <h4 class="text-dark mb-1">Welcome back!</h4>
-                    <p class="text-muted">Sign in to continue to SELLIT_AI</p>
+                    <h4 class="text-dark mb-1">Witamy ponownie!</h4>
+                    <p class="text-muted">Zaloguj się, aby kontynuować korzystanie z SELLIT_AI</p>
                 </div>
 
-                <!-- Login Card -->
+                <!-- Karta logowania -->
                 <div class="card shadow-sm bg-secondary">
                     <div class="card-body p-4">
                         {% if messages %}
                             {% for message in messages %}
                                 <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
                                     {{ message }}
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Zamknij"></button>
                                 </div>
                             {% endfor %}
                         {% endif %}
@@ -28,16 +28,16 @@
                         <form method="post" class="needs-validation" novalidate>
                             {% csrf_token %}
                             
-                            <!-- Username field -->
+                            <!-- Pole użytkownika -->
                             <div class="mb-3">
-                                <label for="id_username" class="form-label">Username</label>
+                                <label for="id_username" class="form-label">Nazwa użytkownika</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-light">
                                         <i class="fas fa-user text-muted"></i>
                                     </span>
                                     <input type="text" name="username" id="id_username" 
                                            class="form-control {% if form.username.errors %}is-invalid{% endif %}"
-                                           placeholder="Enter your username" required>
+                                           placeholder="Wprowadź swoją nazwę użytkownika" required>
                                 </div>
                                 {% if form.username.errors %}
                                     <div class="invalid-feedback d-block">
@@ -46,13 +46,13 @@
                                 {% endif %}
                             </div>
 
-                            <!-- Password field -->
+                            <!-- Pole hasła -->
                             <div class="mb-4">
                                 <div class="d-flex justify-content-between">
-                                    <label for="id_password" class="form-label">Password</label>
-                                    <a href="{% url 'accounts:password_reset' %}" class="text-decoration-none small">
-                                        Forgot password?
-                                    </a>
+                                    <label for="id_password" class="form-label">Hasło</label>
+                                    {% comment %} <a href="{% url 'accounts:password_reset' %}" class="text-decoration-none small">
+                                        Zapomniałeś hasła?
+                                    </a> {% endcomment %}
                                 </div>
                                 <div class="input-group">
                                     <span class="input-group-text bg-light">
@@ -60,7 +60,7 @@
                                     </span>
                                     <input type="password" name="password" id="id_password" 
                                            class="form-control {% if form.password.errors %}is-invalid{% endif %}"
-                                           placeholder="Enter your password" required>
+                                           placeholder="Wprowadź swoje hasło" required>
                                 </div>
                                 {% if form.password.errors %}
                                     <div class="invalid-feedback d-block">
@@ -69,10 +69,10 @@
                                 {% endif %}
                             </div>
 
-                            <!-- Submit button -->
+                            <!-- Przycisk logowania -->
                             <div class="d-grid">
                                 <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                                    <i class="fas fa-sign-in-alt me-2"></i>Zaloguj się
                                 </button>
                             </div>
                         </form>
