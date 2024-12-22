@@ -20,6 +20,9 @@ class AllegroToken(models.Model):
     expires_at = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    class Meta:
+        verbose_name = "Token Allegro"
+        verbose_name_plural = "Tokeny Allegro"
 
     def refresh_if_needed(self):
         try:
@@ -53,6 +56,10 @@ class Category(models.Model):
     parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE)
     parameters = JSONField(default=dict)
     # history = HistoricalRecords()
+    
+    class Meta:
+        verbose_name = "Kategoria"
+        verbose_name_plural = "Kategorie"
 
 class Product(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -66,7 +73,11 @@ class Product(models.Model):
     stock = models.IntegerField(default=0)  # Aktualny stan magazynowy
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    # history = HistoricalRecords()
+    history = HistoricalRecords()
+    
+    class Meta:
+        verbose_name = "Produkt"
+        verbose_name_plural = "Produkty"
 
     def update_allegro_offers(self):
         """Aktualizuje wszystkie oferty na Allegro dla tego produktu"""
@@ -82,7 +93,11 @@ class ProductImage(models.Model):
     product = models.ForeignKey(Product, related_name='images', on_delete=models.CASCADE)
     image = models.ImageField(upload_to='products/')
     order = models.IntegerField(default=0)
-    # history = HistoricalRecords()
+    history = HistoricalRecords()
+    
+    class Meta:
+        verbose_name = "Zdjęcie produktu"
+        verbose_name_plural = "Zdjęcia produktów"
     
     
 class AllegroOffer(models.Model):
@@ -160,7 +175,7 @@ class AllegroOffer(models.Model):
     views = models.IntegerField(default=0)
     watches = models.IntegerField(default=0)
     sales = models.IntegerField(default=0)
-    # history = HistoricalRecords()
+    history = HistoricalRecords()
 
     def __str__(self):
         return f"{self.name} ({self.publication_status})"
@@ -168,6 +183,8 @@ class AllegroOffer(models.Model):
     class Meta:
         ordering = ['-created_at']
         unique_together = ['user', 'external_offer_id']
+        verbose_name = "Oferta Allegro"
+        verbose_name_plural = "Oferty Allegro"
 
     def sync_with_product(self):
         """Synchronizuje ofertę ze stanem magazynowym produktu"""
@@ -195,11 +212,11 @@ class AllegroDefaultSettings(models.Model):
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    # history = HistoricalRecords()
+    history = HistoricalRecords()
     
     class Meta:
-        verbose_name = "Allegro Default Settings"
-        verbose_name_plural = "Allegro Default Settings"
+        verbose_name = "Domyślne ustawienie Allegro"
+        verbose_name_plural = "Domyślne ustawienia Allegro"
        
        
 class AllegroOrder(models.Model):
@@ -239,10 +256,12 @@ class AllegroOrder(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     allegro_created_at = models.DateTimeField(null=True) 
-    # history = HistoricalRecords()
+    history = HistoricalRecords()
 
     class Meta:
         ordering = ['-created_at']
+        verbose_name = "Zamówienie Allegro"
+        verbose_name_plural = "Zamówienia Allegro"
         
     def __str__(self):
         return f"Order {self.allegro_order_id} - {self.buyer_login}"
@@ -277,6 +296,10 @@ class OpenAIRequest(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = "Zapytanie OpenAI"
+        verbose_name_plural = "Zapytania OpenAI"
 
     def __str__(self):
         return f"OpenAI Request by {self.user.username}"
@@ -308,6 +331,10 @@ class OpenAIInstruction(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = "Instrukcja OpenAI"
+        verbose_name_plural = "Instrukcje OpenAI"
 
     def __str__(self):
         return f"Instruction: {self.title} by {self.user.username}"
@@ -327,6 +354,10 @@ class AdminOpenAIConfig(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = "Konfiguracja OpenAI"
+        verbose_name_plural = "Konfiguracje OpenAI"
 
     def __str__(self):
         return "Admin OpenAI Config"
