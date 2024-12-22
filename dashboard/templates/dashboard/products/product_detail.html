@@ -1,0 +1,104 @@
+{% extends "dashboard/home.html" %}
+
+{% block dashboard_content %}
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Szczegóły produktu</h5>
+                <div class="btn-group">
+                    <a href="{% url 'dashboard:product_edit' product.id %}" class="btn btn-warning">
+                        <i class="fas fa-edit me-1"></i> Edytuj
+                    </a>
+                    <button type="button" class="btn btn-danger" onclick="confirmDelete('{{ product.id }}')">
+                        <i class="fas fa-trash me-1"></i> Usuń
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card-body">
+            <div class="row">
+                <!-- Zdjęcia produktu -->
+                <div class="col-md-4">
+                    {% if product.images.all %}
+                        <div id="productCarousel" class="carousel slide" data-bs-ride="carousel">
+                            <div class="carousel-inner">
+                                {% for image in product.images.all %}
+                                    <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                        <img src="{{ image.image.url }}" class="d-block w-100" alt="{{ product.name }}">
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            {% if product.images.count > 1 %}
+                                <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon"></span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#productCarousel" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon"></span>
+                                </button>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Informacje o produkcie -->
+                <div class="col-md-8">
+                    <h3>{{ product.name }}</h3>
+                    <div class="mb-3">
+                        <span class="badge {% if product.stock > 0 %}bg-success{% else %}bg-danger{% endif %}">
+                            Stan magazynowy: {{ product.stock }}
+                        </span>
+                    </div>
+                    <div class="mb-3">
+                        <strong>SKU:</strong> {{ product.sku }}
+                    </div>
+                    <div class="mb-3">
+                        <strong>Cena bazowa:</strong> {{ product.base_price }} PLN
+                    </div>
+                    <div class="mb-3">
+                        <strong>Kategoria:</strong> {{ product.category.name }}
+                    </div>
+                    <div class="mb-3">
+                        <strong>Data utworzenia:</strong> {{ product.created_at|date:"d.m.Y H:i" }}
+                    </div>
+                    <div class="mb-3">
+                        <strong>Ostatnia aktualizacja:</strong> {{ product.updated_at|date:"d.m.Y H:i" }}
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h5>Opis produktu</h5>
+                        <div class="card">
+                            <div class="card-body">
+                                {{ product.description|safe }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal potwierdzenia usunięcia -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Potwierdź usunięcie</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Czy na pewno chcesz usunąć ten produkt? Tej operacji nie można cofnąć.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+                <form id="deleteForm" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Usuń</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

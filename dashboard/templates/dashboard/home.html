@@ -30,7 +30,7 @@
                 </a>
                 <div class="collapse show" id="productSubmenu">
                     <ul class="nav flex-column ms-3">
-                        <li><a href="#" class="nav-link text-white">
+                        <li><a href="{% url 'dashboard:products_list' %}" class="nav-link text-white">
                             <i class="fas fa-list me-2"></i>
                             Lista produktów
                         </a></li>
@@ -39,7 +39,7 @@
             </li>
 
             <li>
-                <a href="#" class="nav-link text-white">
+                <a href="{% url 'dashboard:orders_list'%}" class="nav-link text-white">
                     <i class="fas fa-shopping-cart me-3"></i>
                     Zamówienia
                 </a>

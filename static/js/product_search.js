@@ -4,7 +4,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const searchEanBtn = document.getElementById('searchEanBtn');
     const searchPhraseBtn = document.getElementById('searchPhraseBtn');
     const productsList = document.getElementById('productsList');
-    const productTemplate = document.getElementById('productCardTemplate');
+    
+    // Sprawdź na jakiej stronie jesteśmy
+    const isProductCreate = window.location.pathname.includes('/products/create');
+    const isOfferCreate = window.location.pathname.includes('/products/search');
 
     // Wyszukiwanie po EAN
     searchEanBtn.addEventListener('click', () => {
@@ -38,7 +41,6 @@ document.addEventListener('DOMContentLoaded', function() {
             displayResults(data.products || []);
         } catch (error) {
             console.error('Search error:', error);
-            // Dodaj obsługę błędów
         }
     }
 
@@ -92,7 +94,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="card-footer">
                         <button class="btn btn-primary btn-sm w-100 select-product" 
                                 data-product-id="${product.id}">
-                            Wybierz ten produkt
+                            ${isProductCreate ? 'Dodaj do magazynu' : 'Wybierz do oferty'}
                         </button>
                     </div>
                 </div>
@@ -109,8 +111,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="col-12">
                     <div class="alert alert-info">
                         Nie znaleziono produktów. Spróbuj zmienić kryteria wyszukiwania lub 
-                        <a href="/allegro/offers/create/" class="alert-link">
-                            utwórz nowy produkt
+                        <a href="${isProductCreate ? '#' : '/allegro/offers/create/'}" class="alert-link">
+                            ${isProductCreate ? 'wprowadź dane ręcznie' : 'utwórz nowy produkt'}
                         </a>.
                     </div>
                 </div>`;
@@ -119,23 +121,83 @@ document.addEventListener('DOMContentLoaded', function() {
 
     async function selectProduct(product) {
         try {
-            const response = await fetch('/api/allegro/products/select/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                },
-                body: JSON.stringify({
-                    productId: product.id
-                })
-            });
-            
-            if (response.ok) {
-                // Przekieruj do formularza tworzenia oferty z wybranym produktem
-                window.location.href = `/allegro/offers/create/?product_id=${product.id}`;
+            if (isOfferCreate) {
+                // Jeśli jesteśmy na stronie tworzenia oferty, przekieruj
+                const response = await fetch('/api/allegro/products/select/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    },
+                    body: JSON.stringify({
+                        productId: product.id
+                    })
+                });
+                
+                if (response.ok) {
+                    window.location.href = `/allegro/offers/create/?product_id=${product.id}`;
+                }
+            } else if (isProductCreate) {
+                // Jeśli jesteśmy na stronie tworzenia produktu, wypełnij formularz
+                document.querySelector('input[name="name"]').value = product.name;
+                document.querySelector('input[name="allegro_product_id"]').value = product.id;
+                
+                if (product.ean) {
+                    document.querySelector('input[name="sku"]').value = product.ean;
+                }
+        
+                if (product.category?.id) {
+                    document.querySelector('input[name="category_id"]').value = product.category.id;
+                    document.getElementById('selectedCategoryInfo').innerHTML = `
+                        <strong>Wybrana kategoria:</strong> ${product.category.name}
+                    `;
+                }
+        
+                if (CKEDITOR && CKEDITOR.instances.description && product.description) {
+                    CKEDITOR.instances.description.setData(product.description);
+                }
+        
+                if (product.images && product.images.length > 0) {
+                    const imagePreviewContainer = document.querySelector('#existingImages');
+                    if (imagePreviewContainer) {
+                        imagePreviewContainer.innerHTML = product.images.map((imageUrl, index) => `
+                            <div class="col-md-3 col-sm-4 col-6">
+                                <div class="card h-100">
+                                    <img src="${imageUrl}" class="card-img-top" alt="Product image">
+                                    <div class="card-body p-2">
+                                        <input type="hidden" name="allegro_images[]" value="${imageUrl}">
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('');
+                    }
+                }
+        
+                // Ukryj sekcję wyszukiwania
+                const searchSection = document.querySelector('.card.mb-4');
+                if (searchSection) {
+                    searchSection.style.display = 'none';
+                }
+        
+                // Pokaż komunikat
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'alert alert-success alert-dismissible fade show mb-4';
+                messageDiv.innerHTML = `
+                    <strong>Wybrano produkt z Allegro!</strong> 
+                    Możesz teraz edytować jego dane i zapisać w magazynie.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+        
+                const form = document.querySelector('form');
+                if (form && form.parentNode) {
+                    form.parentNode.insertBefore(messageDiv, form);
+                }
+        
+                form?.scrollIntoView({ behavior: 'smooth' });
             }
         } catch (error) {
             console.error('Error selecting product:', error);
+            alert('Wystąpił błąd podczas wyboru produktu');
         }
     }
     

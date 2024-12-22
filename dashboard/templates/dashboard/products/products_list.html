@@ -1,0 +1,149 @@
+{% extends "dashboard/home.html" %}
+{% load custom_filters %}
+
+{% block dashboard_content %}
+<div class="container-fluid">
+    <div class="card mb-4">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="alert {{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Produkty w magazynie</h5>
+                <div class="btn-group">
+                    <a href="{% url 'dashboard:product_create' %}" class="btn btn-success">
+                        <i class="fas fa-plus"></i> Dodaj produkt
+                    </a>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#filtersModal">
+                        <i class="fas fa-filter"></i> Filtry
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row row-cols-1 row-cols-md-3 g-4">
+                {% for product in products %}
+                <div class="col">
+                    <div class="card h-100">
+                        {% if product.images.first %}
+                        <img src="{{ product.images.first.image.url }}" class="card-img-top" alt="{{ product.name }}"
+                            style="height: 200px; object-fit: cover;">
+                        {% endif %}
+                        <div class="card-body">
+                            <h6 class="card-title">{{ product.name }}</h6>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5>{{ product.base_price }} PLN</h5>
+                                <span class="badge {% if product.stock > 0 %}bg-success{% else %}bg-danger{% endif %}">
+                                    Stan: {{ product.stock }}
+                                </span>
+                            </div>
+                            <div class="mt-2">
+                                <small class="text-muted">
+                                    SKU: {{ product.sku }}
+                                </small>
+                            </div>
+                        </div>
+                        <div class="card-footer d-flex justify-content-between">
+                            <a href="{% url 'dashboard:product_detail' product.id %}" class="btn btn-outline-light">
+                                <i class="fas fa-info-circle me-1"></i> Szczegóły
+                            </a>
+                            <div class="btn-group">
+                                <a href="{% url 'dashboard:product_edit' product.id %}" class="btn btn-outline-warning">
+                                    <i class="fas fa-edit me-1"></i> Edytuj
+                                </a>
+                                <button type="button" class="btn btn-outline-danger" 
+                                        onclick="confirmDelete('{{ product.id }}')">
+                                    <i class="fas fa-trash me-1"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <div class="alert alert-info">
+                        Nie masz jeszcze żadnych produktów. Kliknij "Dodaj produkt" aby rozpocząć.
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filters Modal -->
+<div class="modal fade" id="filtersModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="get">
+                <div class="modal-header">
+                    <h5 class="modal-title">Filtr produktów</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Stan magazynowy</label>
+                        <select name="stock_status" class="form-select">
+                            <option value="">Wszystkie</option>
+                            <option value="in_stock" {% if 'in_stock' in current_filters.stock_status %}selected{% endif %}>W magazynie</option>
+                            <option value="out_of_stock" {% if 'out_of_stock' in current_filters.stock_status %}selected{% endif %}>Brak w magazynie</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Sortowanie</label>
+                        <select name="sort" class="form-select">
+                            <option value="name">Nazwa (A-Z)</option>
+                            <option value="-name">Nazwa (Z-A)</option>
+                            <option value="price">Cena (rosnąco)</option>
+                            <option value="-price">Cena (malejąco)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Zastosuj filtry</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete confirmation modal -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Potwierdź usunięcie</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Czy na pewno chcesz usunąć ten produkt? Tej operacji nie można cofnąć.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+                <form id="deleteForm" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Usuń</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function confirmDelete(productId) {
+    const modal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+    const form = document.getElementById('deleteForm');
+    form.action = `/products/${productId}/delete/`;
+    modal.show();
+}
+</script>
+{% endblock %}

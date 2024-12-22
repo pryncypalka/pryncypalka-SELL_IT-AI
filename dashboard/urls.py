@@ -38,5 +38,14 @@ urlpatterns = [
     
     path('settings/', views.user_settings, name='user_settings'),
     path('settings/update/', views.user_settings_update, name='user_settings_update'),
+    
+    path('products/', views.products_list, name='products_list'),
+    path('products/create/', views.product_form, name='product_create'),
+    path('products/<int:product_id>/', views.product_detail, name='product_detail'),
 
+    path('products/<int:product_id>/edit/', views.product_form, name='product_edit'),
+    path('products/<int:product_id>/delete/', views.product_delete, name='product_delete'),
+    
+    path('orders/', views_allegro.orders_list, name='orders_list'),
+    path('orders/<int:order_id>/details/', views_allegro.order_details, name='order_details'),
 ]

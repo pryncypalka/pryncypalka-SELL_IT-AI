@@ -1,6 +1,6 @@
 import json
 from django.forms import ValidationError
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.http import HttpResponseBadRequest, JsonResponse
@@ -663,3 +663,58 @@ def select_product_api(request):
         return JsonResponse({'success': True})
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)
+    
+@login_required
+def orders_list(request):
+    try:
+        service = AllegroOfferService(request.user)
+        
+        # Pobierz filtry z parametrów GET
+        status = request.GET.getlist('status')
+        fulfillment_status = request.GET.getlist('fulfillment.status')
+        limit = int(request.GET.get('limit', 20))
+        offset = int(request.GET.get('offset', 0))
+        
+        # Pobierz zamówienia
+        orders_data = service.get_checkout_forms(
+            status=status,
+            fulfillment_status=fulfillment_status,
+            limit=limit,
+            offset=offset
+        )
+        
+        # Pobierz ostatnie eventy zamówień
+        events = service.get_order_events(
+            limit=1000,
+            event_types=['BOUGHT', 'FILLED_IN', 'READY_FOR_PROCESSING']
+        )
+
+        context = {
+            'orders': orders_data.get('checkoutForms', []),
+            'total_count': orders_data.get('count', 0),
+            'events': events.get('events', []),
+            'current_filters': {
+                'status': status,
+                'fulfillment_status': fulfillment_status
+            }
+        }
+        
+        return render(request, 'dashboard/integrations/orders_list.html', context)
+        
+    except Exception as e:
+        messages.error(request, f'Wystąpił błąd podczas pobierania zamówień: {str(e)}')
+        return redirect('dashboard:dashboard_home')
+
+@login_required
+def order_details(request, order_id):
+    order = get_object_or_404(AllegroOrder, id=order_id, user=request.user)
+    return JsonResponse({
+        'buyer_name': order.buyer_name,
+        'buyer_login': order.buyer_login,
+        'buyer_email': order.buyer_email,
+        'delivery_address': order.delivery_address,
+        'delivery_method': order.delivery_method,
+        'payment_method': order.payment_method,
+        'payment_status': order.payment_status,
+        'message_from_buyer': order.message_from_buyer
+    })

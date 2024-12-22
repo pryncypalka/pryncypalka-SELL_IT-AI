@@ -652,4 +652,31 @@ class AllegroOfferService:
         return data.get('sender', {})
 
         
+    def get_checkout_forms(self, status=None, fulfillment_status=None, limit=100, offset=0) -> dict:
+        """
+        Gets list of orders.
+        
+        Args:
+            status (list): Filter by order status (BOUGHT, FILLED_IN etc)
+            fulfillment_status (list): Filter by fulfillment status
+            limit (int): Results per page (1-100)
+            offset (int): Page offset
+        Returns:
+            dict: List of orders with details
+        """
+        params = {
+            'limit': limit,
+            'offset': offset
+        }
+        if status:
+            params['status'] = status
+        if fulfillment_status:
+            params['fulfillment.status'] = fulfillment_status
             
+        response = requests.get(
+            f"{self.base_url}/order/checkout-forms",
+            headers=self._get_headers(),
+            params=params
+        )
+        response.raise_for_status()
+        return response.json()         

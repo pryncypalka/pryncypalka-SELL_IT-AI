@@ -1,0 +1,287 @@
+{% extends "dashboard/home.html" %}
+{% load static %}
+
+{% block dashboard_content %}
+<div class="container-fluid">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert {{ message.tags }} alert-dismissible fade show">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Wybór produktu z Allegro -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Wyszukaj gotowy produkt z Allegro</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <!-- Wyszukiwanie po EAN -->
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title">Wyszukaj po kodzie EAN</h6>
+                            <div class="input-group">
+                                <input type="text" id="eanSearch" class="form-control" placeholder="Podaj kod EAN">
+                                <button class="btn btn-primary" id="searchEanBtn">
+                                    Szukaj
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Wyszukiwanie po nazwie -->
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title">Wyszukaj po nazwie produktu</h6>
+                            <div class="input-group">
+                                <input type="text" id="phraseSearch" class="form-control" placeholder="Wpisz nazwę produktu">
+                                <button class="btn btn-primary" id="searchPhraseBtn">
+                                    Szukaj
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="searchResults" class="mt-4">
+                <div id="productsList" class="row g-4">
+                    <!-- Tu będą wyniki wyszukiwania -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formularz produktu -->
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="hidden" id="allegro_product_id" name="allegro_product_id" value="{{ product.allegro_product_id|default:'' }}">
+
+        <!-- Podstawowe informacje -->
+        <div class="card mb-4">
+            <div class="card-header">Podstawowe informacje</div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label>Nazwa produktu</label>
+                    <input type="text" name="name" class="form-control" value="{{ product.name|default:'' }}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label>SKU</label>
+                    <input type="text" name="sku" class="form-control" value="{{ product.sku|default:'' }}" required>
+                </div>
+
+                <!-- Kategoria - podobnie jak w kreatorze ofert -->
+                <div class="mb-3">
+                    <label class="form-label">Kategoria</label>
+                    <input type="hidden" name="category_id" value="{{ product.category_id|default:'' }}">
+                    <div id="categoryMatches" class="mt-2"></div>
+                    <div id="selectedCategoryInfo" class="mt-2 p-2 border rounded">
+                        {% if product.category %}
+                            <strong>Wybrana kategoria:</strong> {{ product.category.name }}
+                        {% endif %}
+                    </div>
+                    <div id="categorySelection" class="category-selection"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label>Opis produktu</label>
+                    <textarea name="description" id="description" class="form-control">{{ product.description|default:'' }}</textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cena i stan magazynowy -->
+        <div class="card mb-4">
+            <div class="card-header">Cena i magazyn</div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label>Cena bazowa</label>
+                            <div class="input-group">
+                                <input type="number" name="base_price" class="form-control" step="0.01" 
+                                       value="{{ product.base_price|default:'' }}" required>
+                                <span class="input-group-text">PLN</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label>Stan magazynowy</label>
+                            <input type="number" name="stock" class="form-control" min="0" 
+                                   value="{{ product.stock|default:0 }}" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Zdjęcia -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Zdjęcia</h5>
+            </div>
+            <div class="card-body">
+                <!-- Istniejące zdjęcia -->
+                <div id="existingImages" class="row g-2 mb-3">
+                    {% if product and product.id %}
+                        {% for image in product.images.all %}
+                        <div class="col-md-3 col-sm-4 col-6">
+                            <div class="card h-100">
+                                <img src="{{ image.image.url }}" class="card-img-top" alt="Product image">
+                                <div class="card-body p-2">
+                                    <div class="form-check">
+                                        <input type="checkbox" name="delete_images" value="{{ image.id }}" class="form-check-input">
+                                        <label class="form-check-label">Usuń</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <!-- Dodawanie nowych zdjęć -->
+                <div class="mb-3">
+                    <label class="form-label">Dodaj nowe zdjęcia</label>
+                    <input type="file" name="new_images" multiple class="form-control" accept="image/*">
+                </div>
+            </div>
+        </div>
+
+        <!-- Przyciski -->
+        <div class="d-flex justify-content-end gap-2 mb-4">
+            <a href="{% url 'dashboard:products_list' %}" class="btn btn-secondary">Anuluj</a>
+            <button type="submit" class="btn btn-primary">
+                {% if product %}Zapisz zmiany{% else %}Utwórz produkt{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/product_search.js' %}"></script>
+<script src="{% static 'ckeditor/ckeditor.js' %}"></script>
+<script>
+    const {
+        ClassicEditor,
+        Essentials,
+        Bold,
+        Italic,
+        Font,
+        Paragraph
+    } = CKEDITOR;
+    
+    ClassicEditor
+        .create(document.querySelector('#description'), {
+            plugins: [Essentials, Bold, Italic, Font, Paragraph],
+            toolbar: [
+                'undo', 'redo', '|', 'bold', 'italic', '|',
+                'fontSize', 'fontFamily', 'fontColor', 'fontBackgroundColor'
+            ],
+            contentStyle: 'body { color: black; }'
+        })
+        .catch(error => {
+            console.error(error);
+        });
+
+    // Dodatkowy JavaScript do obsługi wyboru kategorii i innych funkcji
+    // (można wykorzystać odpowiednie fragmenty z offer_create.js)
+</script>
+
+<script>
+    // Inicjalizacja drzewa kategorii
+    async function loadCategories(parentId = null, container = categorySelection) {
+        try {
+            const response = await fetch(`/api/allegro/categories/${parentId || ''}`);
+            const data = await response.json();
+            renderCategories(data.categories, parentId);
+        } catch (error) {
+            console.error('Error loading categories:', error);
+        }
+    }
+    
+    function renderCategories(categories, parentId) {
+        const container = parentId ? 
+            document.getElementById(`subcategories-${parentId}`) : 
+            categorySelection;
+    
+        const ul = document.createElement('ul');
+        ul.className = 'list-group list-group-flush';
+    
+        categories.forEach(cat => {
+            const li = document.createElement('li');
+            li.className = 'list-group-item';
+            li.innerHTML = `
+                <div class="d-flex align-items-center">
+                    ${!cat.leaf ? `
+                        <button type="button" class="btn btn-sm btn-link p-0 me-2 expand-category" data-id="${cat.id}">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    ` : '<span class="me-4"></span>'}
+                    <a href="#" class="select-category" data-id="${cat.id}" data-name="${cat.name}">${cat.name}</a>
+                </div>
+                <div class="subcategories collapse" id="subcategories-${cat.id}"></div>
+            `;
+            ul.appendChild(li);
+        });
+    
+        if (!parentId) {
+            container.innerHTML = '';
+        }
+        container.appendChild(ul);
+    }
+    
+    // Event listeners dla drzewa kategorii
+    document.addEventListener('click', async function(e) {
+        if (e.target.closest('.expand-category')) {
+            const btn = e.target.closest('.expand-category');
+            const categoryId = btn.dataset.id;
+            const icon = btn.querySelector('i');
+            const container = document.querySelector(`#subcategories-${categoryId}`);
+            
+            if (!container.children.length) {
+                await loadCategories(categoryId, container);
+            }
+            
+            icon.classList.toggle('fa-chevron-right');
+            icon.classList.toggle('fa-chevron-down');
+            container.classList.toggle('show');
+        }
+        
+        if (e.target.closest('.select-category')) {
+            e.preventDefault();
+            const link = e.target.closest('.select-category');
+            const categoryIdInput = document.querySelector('[name="category_id"]');
+            categoryIdInput.value = link.dataset.id;
+            document.getElementById('selectedCategoryInfo').innerHTML = `
+                <strong>Wybrana kategoria:</strong> ${link.dataset.name}
+                <button type="button" class="btn btn-sm btn-link clear-category">zmień</button>
+            `;
+        }
+    
+        if (e.target.closest('.clear-category')) {
+            document.querySelector('[name="category_id"]').value = '';
+            document.getElementById('selectedCategoryInfo').innerHTML = '';
+            document.getElementById('categorySelection').innerHTML = '';
+            loadCategories();
+        }
+    });
+    
+    // Załaduj kategorie główne przy starcie
+    window.addEventListener('DOMContentLoaded', () => {
+        const categoryIdInput = document.querySelector('[name="category_id"]');
+        if (!categoryIdInput.value) {
+            loadCategories();
+        }
+    });
+    </script>
+{% endblock %}
